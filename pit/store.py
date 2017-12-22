@@ -38,6 +38,26 @@ def load_csv(path, sep=","):
         else:
             return Store(data=csvdata, dtype="csv", origin=full_path)
 
+def load_couch_doc(db, doc):
+    """ loads data and prov informaton from couch db """
+    if db:
+        if doc in db:
+            prov = None
+            data = None
+            
+            d = db[doc]
+            if "prov" in d:
+                prov_data = d["prov"]
+                prov = Provenance(**prov_data)
+            if "data" in d:
+                data = d["data"]
+            if prov and data:
+                return Store(data=data, **prov.to_json())
+            elif data:
+                return Store(data=data, origin="couchdb:"+str(db.name)+"/"+str(doc))
+        else:
+            return None
+    return None
 
 class Store():
     """
@@ -115,6 +135,20 @@ class Store():
                     writer.writerow([ value for key, value in row.items() ])
             with open(prov_path, "w") as f:
                 json.dump(self._prov.to_json(), f)
+    
+    def save_to_couch(self, db, doc):
+
+        target = "couchdb:{}/{}".format(db.name, doc)
+        self._prov.set_target(target)
+
+        if doc in db:
+            del db[doc]
+
+        db.save({
+            "_id": doc,
+            "data": self._data,
+            "prov": self._prov.to_json()
+        })
 
     def prov_to_rdf(self, path="prov.ttl", img=False):
         """ convertes provenance information """
