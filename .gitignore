@@ -1,0 +1,6 @@
+testdata/*
+pit.egg-info/*
+*.prov
+*.ttl
+*.png
+*.pyc
