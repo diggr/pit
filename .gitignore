@@ -4,3 +4,4 @@ pit.egg-info/*
 *.ttl
 *.png
 *.pyc
+__pychache__/*

@@ -129,10 +129,12 @@ class Provenance():
                     self._print_prov(data["sources"], base="\t" +base)
 
     def _generate_uri(self, ns, value):
+
         value = value.replace(" ", "_")
         value = quote(value)
         uri = "{}:{}".format(ns, value)
         return uri
+
 
     def _pit_uuid(self):
         _id = "pit_{}".format(uuid.uuid4().hex)
@@ -151,14 +153,15 @@ class Provenance():
                 provdoc.wasDerivedFrom(root_entity, src_entity)
 
             #agent
-            agent = "None"
+            agent = None
             if "agent" in data:
                 agent = data["agent"]
-            desc = "None"
-            src_agent = provdoc.agent(self._generate_uri("agent", agent))
-            provdoc.wasAttributedTo(src_entity, src_agent)
+            if agent:
+                src_agent = provdoc.agent(self._generate_uri("agent", agent))
+                provdoc.wasAttributedTo(src_entity, src_agent)
 
             #activity
+            desc = "None"
             if "desc" in data:
                 desc = data["desc"]
             end = None

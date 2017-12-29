@@ -2,7 +2,12 @@ import click
 import os
 import json
 import sys
+import couchdb
 from pit.prov import Provenance
+
+FILE = "file"
+COUCHDB = "couchdb"
+
 
 def load_prov(filepath):
     """retrieve prov information from file"""
@@ -37,6 +42,8 @@ def load_prov(filepath):
 @click.argument("filepath")
 def cli(agent, filepath, add, desc, origin, sources, update, rdf, ns, img):
     
+    modus = None
+
     src = []
     #sources prov 
     for s in sources:
@@ -49,33 +56,65 @@ def cli(agent, filepath, add, desc, origin, sources, update, rdf, ns, img):
         else:
             raise FileNotFoundError("Source file <{}> does not exist".format(s))
 
-    if not os.path.exists(filepath):
+    # check if filepath = couchdb url
+    if filepath[:8] == "couchdb:":
+
+        modus = COUCHDB
+
+        server = filepath.split("/")[0]
+        server = server.replace("couchdb:", "http://")
+        db = filepath.split("/")[-2]
+        doc = filepath.split("/")[-1]
+
+        try:
+            couch = couchdb.Server(server)
+        except:
+            click.echo("Cannot connect to CouchDB <{}>".format(server))
+        try:
+            database = couch[db]
+        except:
+            click.echo("No database <{}>".format(db))
+        try:
+            document = database[doc]
+        except:
+            click.echo("No document <{}> in database <{}>".format(doc, db))
+
+        
+        if "prov" in document:
+            prov = Provenance(**document["prov"])
+        else:
+            prov = None
+
+        full_path = filepath
+
+   
+    # file 
+    elif not os.path.exists(filepath):
         click.echo("File <{}>  does not exist".format(filepath))
     else: 
-
+        backend = FILE
         full_path = os.path.abspath(filepath)
-
         prov = load_prov(filepath)
 
-        # add new provenance information
-        if (add):
+    # add new provenance information
+    if (add):
 
-            if prov:
-                prov = prov.to_json()
-                src = [prov]+src
-            if origin == "":
-                origin = None
-            if desc == "":
-                desc = None
-            
-            if src == []: src = None
-            if len(src) == 1: src = src[0]
+        if prov:
+            prov = prov.to_json()
+            src = [prov]+src
+        if origin == "":
+            origin = None
+        if desc == "":
+            desc = None
+        
+        if src == []: src = None
+        if len(src) == 1: src = src[0]
 
-            if agent != "" or desc != "" or origin != "" or sources != []:
-                prov = Provenance(agent=agent, desc=desc, origin=origin, sources=src, target=full_path)
+        if agent != "" or desc != "" or origin != "" or sources != []:
+            prov = Provenance(agent=agent, desc=desc, origin=origin, sources=src, target=full_path)
 
-            #save updated prov
-
+        #save updated prov
+        if modus == FILE:
             filetype = filepath.split(".")[-1]
             provfile = filepath+".prov"
             if filetype == "json":
@@ -85,12 +124,15 @@ def cli(agent, filepath, add, desc, origin, sources, update, rdf, ns, img):
             else:
                 with open(provfile, "w") as f:
                     json.dump(prov.to_json(), f)
-        
-        # if available print prov information
-        if prov:
-            prov.print_tree(filepath)
+        elif modus == COUCHDB:
+            document["prov"] = prov.to_json()
+            database.save(document)
+    
+    # if available print prov information
+    if prov:
+        prov.print_tree(filepath)
 
-        if not add and rdf != "":
-            prov.save_to_rdf(rdf, img=img)
+    if not add and rdf != "":
+        prov.save_to_rdf(rdf, img=img)
 
 
