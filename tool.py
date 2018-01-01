@@ -70,19 +70,23 @@ def cli(agent, filepath, add, desc, origin, sources, update, rdf, ns, img):
             couch = couchdb.Server(server)
         except:
             click.echo("Cannot connect to CouchDB <{}>".format(server))
+            return None
         try:
             database = couch[db]
         except:
             click.echo("No database <{}>".format(db))
+            return None
         try:
             document = database[doc]
         except:
             click.echo("No document <{}> in database <{}>".format(doc, db))
+            return None
 
         
         if "prov" in document:
             prov = Provenance(**document["prov"])
         else:
+            click.echo("No provenance information for document <{}> available".format(doc))
             prov = None
 
         full_path = filepath
@@ -92,7 +96,7 @@ def cli(agent, filepath, add, desc, origin, sources, update, rdf, ns, img):
     elif not os.path.exists(filepath):
         click.echo("File <{}>  does not exist".format(filepath))
     else: 
-        backend = FILE
+        modus = FILE
         full_path = os.path.abspath(filepath)
         prov = load_prov(filepath)
 
@@ -108,7 +112,7 @@ def cli(agent, filepath, add, desc, origin, sources, update, rdf, ns, img):
             desc = None
         
         if src == []: src = None
-        if len(src) == 1: src = src[0]
+        elif len(src) == 1: src = src[0]
 
         if agent != "" or desc != "" or origin != "" or sources != []:
             prov = Provenance(agent=agent, desc=desc, origin=origin, sources=src, target=full_path)
