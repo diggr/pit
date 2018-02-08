@@ -1,5 +1,5 @@
 from pit.store import Store, load_csv, load_json, load_couch_doc
-import couchdb
+#import couchdb
 """
 original = load_csv("testdata/nodes.csv")
 original.set_prov(agent="reading script", desc="node data set from another dimension")

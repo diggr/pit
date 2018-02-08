@@ -2,11 +2,11 @@ import click
 import os
 import json
 import sys
-import couchdb
+#import couchdb
 from pit.prov import Provenance
 
 FILE = "file"
-COUCHDB = "couchdb"
+#COUCHDB = "couchdb"
 
 
 def load_prov(filepath):
@@ -56,6 +56,7 @@ def cli(agent, filepath, add, desc, origin, sources, update, rdf, ns, img):
         else:
             raise FileNotFoundError("Source file <{}> does not exist".format(s))
 
+    """ couchdb integration - add later
     # check if filepath = couchdb url
     if filepath[:8] == "couchdb:":
 
@@ -91,12 +92,14 @@ def cli(agent, filepath, add, desc, origin, sources, update, rdf, ns, img):
 
         full_path = filepath
 
-   
+    """
     # file 
-    elif not os.path.exists(filepath):
+    #elif not os.path.exists(filepath):
+    if not os.path.exists(filepath): 
         click.echo("File <{}>  does not exist".format(filepath))
     else: 
         modus = FILE
+
         full_path = os.path.abspath(filepath)
         prov = load_prov(filepath)
 
@@ -117,20 +120,23 @@ def cli(agent, filepath, add, desc, origin, sources, update, rdf, ns, img):
         if agent != "" or desc != "" or origin != "" or sources != []:
             prov = Provenance(agent=agent, desc=desc, origin=origin, sources=src, target=full_path)
 
-        #save updated prov
-        if modus == FILE:
-            filetype = filepath.split(".")[-1]
-            provfile = filepath+".prov"
-            if filetype == "json":
-                data["prov"] = prov.to_json()
-                with open(filepath, "w") as f:
-                    json.dump(data, f)
-            else:
-                with open(provfile, "w") as f:
-                    json.dump(prov.to_json(), f)
-        elif modus == COUCHDB:
-            document["prov"] = prov.to_json()
-            database.save(document)
+
+        filetype = filepath.split(".")[-1]
+        provfile = filepath+".prov"
+        if filetype == "json":
+
+            with open(filepath) as f:
+                raw_data = json.load(f)
+            data = {}
+            data["data"] = raw_data
+
+            data["prov"] = prov.to_json()
+            with open(filepath, "w") as f:
+                json.dump(data, f)
+        else:
+            with open(provfile, "w") as f:
+                json.dump(prov.to_json(), f)
+
     
     # if available print prov information
     if prov:

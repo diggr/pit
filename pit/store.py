@@ -38,8 +38,10 @@ def load_csv(path, sep=","):
         else:
             return Store(data=csvdata, dtype="csv", origin=full_path)
 
+#couch db functionality -- add at later point
 def load_couch_doc(db, doc):
     """ loads data and prov informaton from couch db """
+    """
     if db:
         if doc in db:
             prov = None
@@ -57,7 +59,8 @@ def load_couch_doc(db, doc):
                 return Store(data=data, origin="couchdb:"+str(db.name)+"/"+str(doc))
         else:
             return None
-    return None
+    return None"""
+    raise NotImplementedError
 
 class Store():
     """
@@ -137,7 +140,8 @@ class Store():
                 json.dump(self._prov.to_json(), f)
     
     def save_to_couch(self, db, doc):
-
+        """ add later"""
+        """
         target = "couchdb:{}/{}".format(db.name, doc)
         self._prov.set_target(target)
 
@@ -148,7 +152,8 @@ class Store():
             "_id": doc,
             "data": self._data,
             "prov": self._prov.to_json()
-        })
+        })"""
+        raise NotImplementedError
 
     def prov_to_rdf(self, path="prov.ttl", img=False):
         """ convertes provenance information """

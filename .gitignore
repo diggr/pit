@@ -1,7 +1,10 @@
-testdata/*
-pit.egg-info/*
+testdata/
+pit.egg-info/
 *.prov
 *.ttl
 *.png
 *.pyc
-__pychache__/*
+__pychache__/
+pit/__pycache__/
+.vscode/
+main.py
