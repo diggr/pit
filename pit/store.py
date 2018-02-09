@@ -40,26 +40,6 @@ def load_csv(path, sep=","):
 
 #couch db functionality -- add at later point
 def load_couch_doc(db, doc):
-    """ loads data and prov informaton from couch db """
-    """
-    if db:
-        if doc in db:
-            prov = None
-            data = None
-            
-            d = db[doc]
-            if "prov" in d:
-                prov_data = d["prov"]
-                prov = Provenance(**prov_data)
-            if "data" in d:
-                data = d["data"]
-            if prov and data:
-                return Store(data=data, **prov.to_json())
-            elif data:
-                return Store(data=data, origin="couchdb:"+str(db.name)+"/"+str(doc))
-        else:
-            return None
-    return None"""
     raise NotImplementedError
 
 class Store():
@@ -86,11 +66,9 @@ class Store():
         self._dtype = dtype
         self._data = deepcopy(data)
 
-    def set_prov(self, prov):
-        self._prov = deepcopy(prov)
-
     def set_prov(
         self, 
+        prov=None,
         origin=None, 
         sources=None, 
         agent=None, 
@@ -98,9 +76,12 @@ class Store():
         date=datetime.now().isoformat()
     ):
         """  set/reset provenance information for data object """
-        if origin == None:
-            origin = self._prov.get_origin()    
-        self._prov = Provenance(origin=origin, sources=sources, agent=agent, desc=desc, date=date)
+        if prov != None:
+            self._prov = prov
+        else:
+            if origin == None:
+                origin = self._prov.get_origin()    
+            self._prov = Provenance(origin=origin, sources=sources, agent=agent, desc=desc, date=date)
 
     def data(self):
         """ returns a copy of the data in the data store """
@@ -140,19 +121,6 @@ class Store():
                 json.dump(self._prov.to_json(), f)
     
     def save_to_couch(self, db, doc):
-        """ add later"""
-        """
-        target = "couchdb:{}/{}".format(db.name, doc)
-        self._prov.set_target(target)
-
-        if doc in db:
-            del db[doc]
-
-        db.save({
-            "_id": doc,
-            "data": self._data,
-            "prov": self._prov.to_json()
-        })"""
         raise NotImplementedError
 
     def prov_to_rdf(self, path="prov.ttl", img=False):
