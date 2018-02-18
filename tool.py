@@ -106,6 +106,7 @@ def cli(agent, filepath, add, desc, origin, sources, update, rdf, ns, img):
     # add new provenance information
     if (add):
 
+        #prov = [prov]
         if prov:
             prov = prov.to_json()
             src = [prov]+src
@@ -115,7 +116,7 @@ def cli(agent, filepath, add, desc, origin, sources, update, rdf, ns, img):
             desc = None
         
         if src == []: src = None
-        elif len(src) == 1: src = src[0]
+        #elif len(src) == 1: src = src[0]
 
         if agent != "" or desc != "" or origin != "" or sources != []:
             prov = Provenance(agent=agent, desc=desc, origin=origin, sources=src, target=full_path)

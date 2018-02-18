@@ -1,10 +1,31 @@
 import json
+import uuid
+import os
+
 from copy import deepcopy
 from datetime import datetime
 from prov.model import ProvDocument
-import uuid
 from urllib.parse import quote
 from prov.dot import prov_to_dot
+
+def load_prov(filename):
+    """ loads provenance information from file """
+
+    file_type = filename.split(".")[-1]
+    if file_type == "json":
+        with open(filename) as f:
+            data = json.load(f)
+            if "prov" in data:
+                return Provenance(**data["prov"])
+            else:
+                return None
+    else:
+        prov_file = filename+".prov"
+        if os.path.exists(prov_file):
+            with open(prov_file) as f:
+                return Provenance(**json.load(f))
+        else: 
+            return None
 
 def validate_prov(        
     origin=None, 
@@ -91,6 +112,23 @@ class Provenance():
     def get_origin(self):
         return self.origin
 
+    def _sources(self):
+        if type(self.sources) == list:
+            for s in self.sources:
+                yield(s)
+
+    def get_origins(self):
+        """ return all origin information from prov + sources """
+        origins = set()
+        origins.add(self.origin)
+        for s in self._sources():
+            s_origins = set(Provenance(**s).get_origins())
+
+            origins = origins.union(s_origins)
+            print(origins)
+        return [x for x in origins if x]
+
+
     def to_json(self):
         """ returns povenance information as json/dict """
         output = {
@@ -102,7 +140,9 @@ class Provenance():
             "date": self.date
         }
         return output
- 
+
+
+    
     def _print_element(self, base, elem, data):
         """ prints a provenance element if available """
         if data != None:
@@ -134,7 +174,6 @@ class Provenance():
         value = quote(value)
         uri = "{}:{}".format(ns, value)
         return uri
-
 
     def _pit_uuid(self):
         _id = "pit_{}".format(uuid.uuid4().hex)
