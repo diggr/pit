@@ -1,266 +1,171 @@
+"""
+Provenance class handles provenance metadata information.
+
+Use:
+
+from pit.prov import Provenance
+
+#load prov data for a file, or create new prov for file
+prov = Provenance(<filepath>)
+
+#add provenance metadata
+prov.add(agent="agent", activity="activity", description="...")
+prov.add_priary_source("primary_source", url="http://...", comment="...")
+
+#return provenance as json tree
+prov.tree()
+
+#save provenance metadata
+prov.save()
+
+"""
+
 import json
 import uuid
 import os
 
-from copy import deepcopy
 from datetime import datetime
-from prov.model import ProvDocument
-from urllib.parse import quote
-from prov.dot import prov_to_dot
+from rdflib import Graph, Namespace, URIRef, Literal
+from rdflib.namespace import RDF, FOAF, RDFS
 
-def load_prov(filename):
-    """ loads provenance information from file """
+from .utils import load_jsonld
 
-    file_type = filename.split(".")[-1]
-    if file_type == "json":
-        with open(filename) as f:
-            data = json.load(f)
-            if "prov" in data:
-                return Provenance(**data["prov"])
-            else:
-                return None
-    else:
-        prov_file = filename+".prov"
-        if os.path.exists(prov_file):
-            with open(prov_file) as f:
-                return Provenance(**json.load(f))
-        else: 
-            return None
+#Additional namespaces
+PIT = {
+    "entity": "http://pit.diggr.link/",
+    "agent": "http://pit.diggr.link/agent#",
+    "activity": "http://pit.diggr.link/act/"
+}
+PROV = Namespace("http://www.w3.org/ns/prov#")
 
-def validate_prov(        
-    origin=None, 
-    sources=None, 
-    target=None, 
-    agent=None, 
-    desc=None, 
-    date=datetime.now().isoformat()
-):
-    """ check if provenance data is valid """
-    valid_info = 0
-    if origin:
-        if type(origin) != str:
-            raise TypeError("<origin> has to be string")
-        valid_info += 1
-    if desc:
-        if type(desc) != str:
-            raise TypeError("<desc> has to be string")
-        valid_info += 1
-    if sources:
-        if type(sources) == list:
-            for source in sources:
-                p = validate_prov(**source)
-        elif type(sources) == dict:
-            p = validate_prov(**sources)
-        else:
-            raise TypeError("<sources> not valid data")
-        valid_info += 1
-    if target:
-        if type(target) != str:
-            raise TypeError("<target> hs to be string")
-        valid_info += 1
-    if agent:
-        if type(agent) != str:
-            raise TypeError("<aggent> hs to be string") 
-        valid_info += 1
-    
-    # todo: check date format
 
-    #no valid provenance information available
-    if valid_info == 0:
-        raise ValueError("No valid provenance information")
-
-    return True
-
-class Provenance():
+class Provenance(object):
     """
-    Class containing provenance information
-
-    :origin:    original data source  (API, file)
-    :sources:   provenance information from source data objects
-    :target:    persistent target of data object (e.g. file)
-    :agent:     agent handling the data object (e.g. script, user)
-    :desc:      short description of the data manipulation process
-    :date:      timestamp
+    Provenance class handles the provenance metadata graph
     """
+    graph = Graph()
 
-    def __init__(
-        self, 
-        origin=None, 
-        sources=None, 
-        target=None, 
-        agent=None, 
-        desc=None, 
-        date=None
-    ):
-
-        if validate_prov(origin, sources, target, agent, desc, date):
-            
-            if not date:
-                date = datetime.now().isoformat()
-
-            self.origin = origin
-            self.sources = deepcopy(sources)
-            self.target = target
-            self.agent = agent
-            self.desc = desc
-            self.date = date
-
-    def set_target(self, target):
-        """ set target """
-        self.target = target
-
-    def get_origin(self):
-        return self.origin
-
-    def _sources(self):
-        if type(self.sources) == list:
-            for s in self.sources:
-                yield(s)
-
-    def get_origins(self):
-        """ return all origin information from prov + sources """
-        origins = set()
-        origins.add(self.origin)
-        for s in self._sources():
-            s_origins = set(Provenance(**s).get_origins())
-
-            origins = origins.union(s_origins)
-            print(origins)
-        return [x for x in origins if x]
-
-
-    def to_json(self):
-        """ returns povenance information as json/dict """
-        output = {
-            "origin": self.origin,
-            "sources": deepcopy(self.sources),
-            "target": self.target,
-            "agent": self.agent,
-            "desc": self.desc,
-            "date": self.date
+    def _set_up_context(self):
+        """
+        Initializes Namespaces and JSON-LD context
+        """
+        self.context = { 
+            "rdfs": str(RDFS),
+            "prov": "http://www.w3.org/ns/prov#", 
+            "pit_entity": PIT["entity"],
+            "pit_agent": PIT["agent"],
+            "pit_activity": PIT["activity"],
         }
-        return output
+        #print(self.context)
+
+    def _generate_entity_node(self):
+        """
+        Creates provenance entity URI 
+        """
+        id_ = "pit_{}".format(uuid.uuid4().hex)
+        entity = URIRef("{}{}".format(PIT["entity"], id_))
+        #add entity and entity location to graph
+        self.graph.add( (entity, RDF.type, PROV.Entity) )
+        self.graph.add( (entity, PROV.atLocation, Literal(self.location)) ) 
+        return entity
+
+    def _generate_agent_node(self, agent):
+        """
+        Creates provenance agent URI
+        """
+        agent = URIRef("{}{}".format(PIT["agent"], agent))
+        #add agent to graph
+        self.graph.add( (agent, RDF.type, PROV.Agent) )
+        self.graph.add( (self.entity, PROV.wasAttributedTo, agent) )    
+
+    def _generate_activity_node(self, activity, desc):
+        """
+        Creates provenance activity URI
+        """
+        id_ =  "{}_{}".format(activity, uuid.uuid4().hex)
+        activity = URIRef("{}{}".format(PIT["activity"], id_))
+        #add activity to graph
+        self.graph.add( (activity, RDF.type, PROV.Activity) )
+        if type(desc) == str:
+            self.graph.add( (activity, RDFS.label, Literal(desc)) ) 
+        self.graph.add( (activity, PROV.endedAtTime, Literal(datetime.now().isoformat(), datatype="xsd:dateTime")) )
+        self.graph.add( (self.entity, PROV.wasGeneratedBy, activity) )
 
 
-    
-    def _print_element(self, base, elem, data):
-        """ prints a provenance element if available """
-        if data != None:
-            if elem in data:
-                if data[elem] != None:
-                    print("{base}{elem}: {value}".format(base=base, elem=elem, value=data[elem]))
+    def _get_root_entity(self):
+        #get all Nodes of type prov:Entity 
+        entities = [ s for s,p,o in self.graph.triples( (None, RDF.type, PROV.Entity) ) ]
+        derived =  [ o for s,p,o in self.graph.triples( (None, PROV.wasDerivedFrom, None) ) ]
+        root = list(set(entities) - set(derived))
+        if len(root) != 1:
+            print("invalid provenance file")
+        else:
+            return root[0]
+        
+    def __init__(self, filepath):
+        
+        self._set_up_context()
+        self.prov_filepath = "{}.prov".format(filepath)
+        self.location = os.path.abspath(filepath)
 
-    def _print_prov(self, data, base=" |- "):
-        """ prints a level of provenance information """
-        print(base[:len(base)-2])
-        self._print_element(base, "origin", data)
-        self._print_element(base, "agent", data)
-        self._print_element(base, "date", data)
-        self._print_element(base, "desc", data)
-        self._print_element(base, "target", data)
-        if data:
-            if data["sources"] != None:
-                print("{base}Sources:".format(base=base))
-                if type(data["sources"]) == list:
-                    for source in data["sources"]:
-                        self._print_prov(source, base="\t" +base)
+        if not os.path.exists(self.prov_filepath):
+            self.init = True
+            #generate new entity
+            self.entity = self._generate_entity_node()
+        else:
+            self.init = False
+            #load and parse provenance json-ld file
+            g, context = load_jsonld(self.prov_filepath)
+            self.context = context
+            self.graph = g
+            #set root entity
+            self.entity = self._get_root_entity()
+            #print(self.entity)
+            #print(g.serialize(format="json-ld", context=self.context))
 
-                else:
-                    self._print_prov(data["sources"], base="\t" +base)
+    def add(self, agent, activity, description):
+        """
+        Add new basic provenance information (agent, activity) to file
+        """
+        if not self.init:
+            #create new entity
+            prior_entity = self.entity
+            self.entity = self._generate_entity_node()
+            #new prov entity is derived from old one
+            self.graph.add( (self.entity, PROV.wasDerivedFrom, prior_entity))
 
-    def _generate_uri(self, ns, value):
+        #add prov information
+        self._generate_agent_node(agent)
+        self._generate_activity_node(activity, description)
+        self.init = False
 
-        value = value.replace(" ", "_")
-        value = quote(value)
-        uri = "{}:{}".format(ns, value)
-        return uri
+    def add_source(self, filepath):
+        raise NotImplementedError
 
-    def _pit_uuid(self):
-        _id = "pit_{}".format(uuid.uuid4().hex)
-        return _id
+    def add_primary_source(self, primary_source, url=None, comment=None):
+        """
+        Adds primary source (+ url and comment) to provenance information
+        """
+        primary_source = URIRef("{}{}".format(PIT["entity"], primary_source))
+        self.graph.add( (primary_source, RDF.type, PROV.PrimarySource) )
+        self.graph.add( (self.entity, PROV.hadPrimarySource, primary_source ) ) 
 
-    def _json_to_rdf(self, data, provdoc, root_entity):
-        """ recursively iterates through prov data and add information to provdoc """
-        if data: 
-            #entity
-            label = "None"
-            if "target" in data:
-                label = data["target"]
-            _id = self._pit_uuid()
-            src_entity = provdoc.entity(self._generate_uri("data", _id), {"prov:label": label})
-            if root_entity:
-                provdoc.wasDerivedFrom(root_entity, src_entity)
-
-            #agent
-            agent = None
-            if "agent" in data:
-                agent = data["agent"]
-            if agent:
-                src_agent = provdoc.agent(self._generate_uri("agent", agent))
-                provdoc.wasAttributedTo(src_entity, src_agent)
-
-            #activity
-            desc = "None"
-            if "desc" in data:
-                desc = data["desc"]
-            end = None
-            if "date" in data:
-                end = data["date"]
-            _id = self._pit_uuid()
-            src_activity =provdoc.activity(self._generate_uri("activity", _id), endTime=end, other_attributes={"prov:label": desc})
-            provdoc.wasGeneratedBy(src_entity, src_activity)
-
-            #origin - primary source
-            origin = "None"
-            if "origin" in data:
-                origin = data["origin"]
-                if origin:
-                    _id = self._pit_uuid()
-                    primary_source = provdoc.entity(self._generate_uri("data", _id),  {"prov:label": origin})
-                    provdoc.hadPrimarySource(src_entity, primary_source)
-
-            #sources
-            if "sources" in data:
-                if type(data["sources"]) == list:
-                    for source in data["sources"]:
-                        provdoc = self._json_to_rdf(source, provdoc, src_entity)
-                else:
-                    provdoc = self._json_to_rdf(data["sources"], provdoc, src_entity)
-
-        return provdoc        
-
-    def save_to_rdf(
-        self, 
-        filename="prov.ttl",
-        data_ns="http://pit.example.com/datapoints/", 
-        agent_ns="http://pit.example.com/agents/", 
-        activity_ns="http://pit.example.com/activities/",
-        img=False
-    ):
-        """ converts provenance data into rdf """
-        provdoc = ProvDocument()
-        provdoc.add_namespace("data", data_ns)
-        provdoc.add_namespace("agent", agent_ns)
-        provdoc.add_namespace("activity", activity_ns)
-
-        data = self.to_json()
-        self._json_to_rdf(data, provdoc, None)
-
-        #export rdf prov as image
-        if img:
-            dot = prov_to_dot(provdoc)
-            img_file = filename.replace(".ttl", ".png")
-            dot.write_png(img_file)
-
-        provdoc.serialize(filename, format="rdf", rdf="ttl")
-    
-    def print_tree(self, title=""):
-        """ recursevly prints provenance information as tree"""
-        print(title)
-        self._print_prov(self.to_json())
+        if comment:
+            self.graph.add( (primary_source, RDFS.comment, Literal(comment)) )
+        if url:
+            self.graph.add( (primary_source, FOAF.homepage, Literal(url)) )
+        
+    def save(self):
+        with open(self.prov_filepath, "wb") as f:
+            f.write(self.graph.serialize(format="json-ld", context=self.context))
 
     def __str__(self):
-        raise NotImplementedError
+        pass
     
     def __repr__(self):
-        raise NotImplementedError
+        return "Provenance(\"{}\")".format(self.location)
+
+    def get_primary_sources(self):
+        primary_sources = [ str(o) for s,p,o in self.graph.triples( (None, PROV.hadPrimarySource, None) ) ]
+        return list(set(primary_sources))
+        
