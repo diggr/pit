@@ -1,12 +1,11 @@
 from pit.prov import Provenance
+import pprint
 
-# prov = Provenance(filepath="testdata/test.csv")
-# prov.add(agent="peter", activity="fetcher", description="some youtube data api call")
-# prov.add_primary_source("youtube", url="http://www.youtube.com", comment="everybody knows it")
-# prov.save()
+pp = pprint.PrettyPrinter(indent=2)
 
-prov = Provenance(filepath="testdata/test.csv")
-# prov.add(agent="script", activity="mapping", description="awesome mapping script")
-# prov.save()
-print(repr(prov))
-print(prov.get_primary_sources())
+prov = Provenance("testdata/test.csv")
+prov.add(agent="yt-fetcher", activity="fetch", description="fetching via youtube data api")
+prov.add_primary_source("youtube", "http://www.youtube.com", "you know it")
+prov.add_sources("testdata/yada.txt")
+prov.save()
+pp.pprint(prov.tree())
