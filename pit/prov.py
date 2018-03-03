@@ -16,7 +16,7 @@ prov.add_sources(["filepath1", "filepath2"])
 #return provenance as json tree
 prov_dict = prov.tree()
 
-#save provenance metadata
+#save provenance metadata into "<filename>.prov" file
 prov.save()
 """
 
@@ -30,6 +30,13 @@ from rdflib.namespace import RDF, FOAF, RDFS
 
 from .utils import load_jsonld
 
+
+def load_prov( filepath):
+    prov_filepath = "{}.prov".format(filepath)
+    if os.path.exists(prov_filepath):        
+        return Provenance(filepath)
+    else:
+        return None
 
 #Additional namespaces
 PIT = {
@@ -51,6 +58,7 @@ class Provenance(object):
         """
         self.context = { 
             "rdfs": str(RDFS),
+            "foaf": str(FOAF),
             "prov": "http://www.w3.org/ns/prov#", 
             "pit_entity": PIT["entity"],
             "pit_agent": PIT["agent"],
@@ -99,13 +107,12 @@ class Provenance(object):
         #get all entity nodes, which are sources
         derived =  [ o for s,p,o in self.graph.triples( (None, PROV.wasDerivedFrom, None) ) ]
         root = list(set(entities) - set(derived))
-        print(entities)
         if len(root) != 1:
             print("invalid provenance data")
         else:
             return root[0]
         
-    def __init__(self, filepath):
+    def __init__(self, filepath, create_new=True):
         """
         Initialize object with provenance graph for file :filepath:
         If no provenance file is available create new provenance graph
@@ -116,6 +123,10 @@ class Provenance(object):
         self.location = os.path.abspath(filepath)
 
         if not os.path.exists(self.prov_filepath):
+
+            if create_new == False:
+                return None
+
             self.init = True
             #generate new entity
             self.entity = self._generate_entity_node()
@@ -147,7 +158,7 @@ class Provenance(object):
     def add_sources(self, filepaths, add_prov_to_source=True):
         """
         Add provenance information from source file (wasDerivedFrom) to provenance graph
-        If source file does not have valid provenance data, an prov graph for the file is initialized 
+        If source file does not have valid provenance data, a prov graph for the source file is initialized 
         """
         if type(filepaths) == str:
             filepaths = [filepaths]
@@ -199,6 +210,25 @@ class Provenance(object):
 
         #get provenance information
         location = [ o for s,p,o in self.graph.triples( (root_entity, PROV.atLocation, None) ) ]
+        primary_sources = []
+        for s,p,o in self.graph.triples( (root_entity, PROV.hadPrimarySource, None) ):
+            uri = str(o)
+            url = [ o2 for s2,p2,o2 in self.graph.triples( (o, FOAF.homepage, None) ) ]
+            if len(url) > 0:
+                url = str(url[0])
+            else:
+                url = ""
+            comment = [ o2 for s2,p2,o2 in self.graph.triples( (o, RDFS.comment, None) ) ]
+            if len(comment) > 0:
+                comment = str(comment[0])
+            else:
+                comment = ""
+            
+            primary_sources.append({
+                "uri": uri,
+                "url": url,
+                "comment": comment
+            })
 
         #get sources data
         sources = []
@@ -208,6 +238,7 @@ class Provenance(object):
 
         tree["uri"] = str(root_entity)
         tree["location"] = str(location[0])
+        tree["primary_sources"] = primary_sources
         tree["sources"] = sources
         return tree
 
