@@ -6,5 +6,6 @@ pit.egg-info/
 *.pyc
 __pychache__/
 pit/__pycache__/
-.vscode/
 main.py
+.vscode/
+.idea
