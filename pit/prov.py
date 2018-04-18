@@ -108,7 +108,8 @@ class Provenance(object):
         derived =  [ o for s,p,o in self.graph.triples( (None, PROV.wasDerivedFrom, None) ) ]
         root = list(set(entities) - set(derived))
         if len(root) != 1:
-            print("invalid provenance data")
+            raise TypeError("Invalid provenance file: cannot locate root element")
+            #print("invalid provenance data")
         else:
             return root[0]
         
@@ -121,6 +122,7 @@ class Provenance(object):
         self._set_up_context()
         self.prov_filepath = "{}.prov".format(filepath)
         self.location = os.path.abspath(filepath)
+        self.timestamp = datetime.now().isoformat()
 
         if not os.path.exists(self.prov_filepath):
 
@@ -210,6 +212,24 @@ class Provenance(object):
 
         #get provenance information
         location = [ o for s,p,o in self.graph.triples( (root_entity, PROV.atLocation, None) ) ]
+
+        #agent
+        agent = [  o for s,p,o in self.graph.triples( (root_entity, PROV.wasAttributedTo, None) )] 
+        if len(agent) == 0:
+            agent = [ "" ]
+
+        #activity
+        activity = [ o for s,p,o in self.graph.triples( (root_entity, PROV.wasGeneratedBy, None) ) ]  
+        if len(activity) > 0:
+            ended_at = [ o for s,p,o in self.graph.triples( (activity[0], PROV.endedAtTime, None) ) ] 
+            desc = [ o for s,p,o in self.graph.triples( (activity[0], RDFS.label, None) ) ] 
+        else:
+            activity = [ "" ]
+            ended_at = [""]
+            desc = [""]
+        
+
+        #primary sources
         primary_sources = []
         for s,p,o in self.graph.triples( (root_entity, PROV.hadPrimarySource, None) ):
             uri = str(o)
@@ -237,6 +257,10 @@ class Provenance(object):
             sources.append(source_data)
 
         tree["uri"] = str(root_entity)
+        tree["agent"] =  str(agent[0])
+        tree["activity"] = str(activity[0])
+        tree["ended_at"] =  str(ended_at[0])
+        tree["activitiy_desc"] = str(desc[0])
         tree["location"] = str(location[0])
         tree["primary_sources"] = primary_sources
         tree["sources"] = sources
