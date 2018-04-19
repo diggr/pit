@@ -12,6 +12,9 @@ def load_jsonld(filepath):
         graph = file_data["@graph"]
     else:
         graph = file_data
-    context = file_data["@context"]
+    try:
+        context = file_data["@context"]
+    except:
+        raise IOError("JSON-LD Error: Context missing.")
     g = Graph().parse(data=json.dumps(graph), format="json-ld", context=context)
     return (g, context)

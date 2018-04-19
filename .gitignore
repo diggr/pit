@@ -9,3 +9,5 @@ pit/__pycache__/
 main.py
 .vscode/
 .idea
+pit/test
+.pytest_cache
