@@ -1,9 +1,9 @@
 """
-PIT command line tool 
+PIT command line client
 
-Use:
+Usage:
 
-show provenance file infomration
+show provenance file information
 pit <filepath> 
 
 """
