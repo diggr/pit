@@ -30,7 +30,7 @@ setup(
     include_package_data=True,
     entry_points="""
         [console_scripts]
-        pit=tool:cli
+        pit=pit.tool:cli
     """,
     classifiers=[
         'Development Status :: 3 - Alpha',
