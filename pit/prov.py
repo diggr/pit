@@ -42,7 +42,7 @@ def load_prov( filepath):
 PIT = {
     "entity": "http://pit.diggr.link/",
     "agent": "http://pit.diggr.link/agent#",
-    "activity": "http://pit.diggr.link/act/"
+    "activity": "http://pit.diggr.link/activity/"
 }
 PROV = Namespace("http://www.w3.org/ns/prov#")
 
@@ -69,7 +69,7 @@ class Provenance(object):
         """
         Creates provenance entity URI 
         """
-        id_ = "pit_{}".format(uuid.uuid4().hex)
+        id_ = "{}_{}".format(self.file_name.replace(".", "_"), uuid.uuid4().hex)
         entity = URIRef("{}{}".format(PIT["entity"], id_))
         #add entity and entity location to graph
         self.graph.add( (entity, RDF.type, PROV.Entity) )
@@ -85,18 +85,21 @@ class Provenance(object):
         self.graph.add( (agent, RDF.type, PROV.Agent) )
         self.graph.add( (self.entity, PROV.wasAttributedTo, agent) )    
 
-    def _generate_activity_node(self, activity, desc):
+    def _generate_activity_node(self, agent, activity, desc):
         """
         Creates provenance activity URI
         """
-        id_ =  "{}_{}".format(activity, uuid.uuid4().hex)
-        activity = URIRef("{}{}".format(PIT["activity"], id_))
+        base_activity = "{}/{}".format(agent, activity)
+        id_ =  "{}/{}".format(base_activity, uuid.uuid4().hex)
+        base_activity_uri = URIRef("{}{}".format(PIT["activity"], base_activity))
+        activity_uri = URIRef("{}{}".format(PIT["activity"], id_))
         #add activity to graph
-        self.graph.add( (activity, RDF.type, PROV.Activity) )
+        self.graph.add( (activity_uri, RDF.type, PROV.Activity) )
         if type(desc) == str:
-            self.graph.add( (activity, RDFS.label, Literal(desc)) ) 
-        self.graph.add( (activity, PROV.endedAtTime, Literal(datetime.now().isoformat(), datatype="xsd:dateTime")) )
-        self.graph.add( (self.entity, PROV.wasGeneratedBy, activity) )
+            self.graph.add( (activity_uri, RDFS.label, Literal(desc)) ) 
+        self.graph.add( (activity_uri, PROV.endedAtTime, Literal(datetime.now().isoformat(), datatype="xsd:dateTime")) )
+        self.graph.add( (self.entity, PROV.wasGeneratedBy, activity_uri) )
+        #self.graph.add( (activity_uri, PROV.used, base_activity_uri) )
 
     def _get_root_entity(self):
         """
@@ -120,6 +123,9 @@ class Provenance(object):
         """
         self.graph = Graph()
         self._set_up_context()
+
+        self.file_name = os.path.basename(filepath)
+
         self.prov_filepath = "{}.prov".format(filepath)
         self.location = os.path.abspath(filepath)
         self.timestamp = datetime.now().isoformat()
@@ -154,7 +160,7 @@ class Provenance(object):
 
         #add prov information
         self._generate_agent_node(agent)
-        self._generate_activity_node(activity, description)
+        self._generate_activity_node(agent, activity, description)
         self.init = False
 
     def add_sources(self, filepaths, add_prov_to_source=True):
