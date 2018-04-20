@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
+
 from rdflib import Graph
 import json
-import os
+
 
 def load_jsonld(filepath):
     """
@@ -14,7 +16,7 @@ def load_jsonld(filepath):
         graph = file_data
     try:
         context = file_data["@context"]
-    except:
+    except Exception:
         raise IOError("JSON-LD Error: Context missing.")
     g = Graph().parse(data=json.dumps(graph), format="json-ld", context=context)
     return (g, context)
