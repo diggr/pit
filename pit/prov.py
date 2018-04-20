@@ -38,39 +38,34 @@ def load_prov( filepath):
     else:
         return None
 
-#Additional namespaces
-PIT = {
-    "entity": "http://pit.diggr.link/",
-    "agent": "http://pit.diggr.link/agent#",
-    "activity": "http://pit.diggr.link/activity/"
-}
+PROVIT_NS = "http://provit.diggr.link/"
 PROV = Namespace("http://www.w3.org/ns/prov#")
-
 
 class Provenance(object):
     """
     Provenance class handles the provenance metadata graph 
     """
 
-    def _set_up_context(self):
+    def _set_up_context(self, namespace):
         """
         Initializes Namespaces and JSON-LD context
         """
+        if not namespace:
+            namespace = PROVIT_NS
         self.context = { 
             "rdfs": str(RDFS),
             "foaf": str(FOAF),
             "prov": "http://www.w3.org/ns/prov#", 
-            "pit_entity": PIT["entity"],
-            "pit_agent": PIT["agent"],
-            "pit_activity": PIT["activity"],
+            "provit_ns": namespace
         }
+        self.namespace = namespace
 
     def _generate_entity_node(self):
         """
         Creates provenance entity URI 
         """
-        id_ = "{}_{}".format(self.file_name.replace(".", "_"), uuid.uuid4().hex)
-        entity = URIRef("{}{}".format(PIT["entity"], id_))
+        id_ = "{}/{}".format(self.file_name.replace(".", "_"), uuid.uuid4().hex)
+        entity = URIRef("{}{}".format(self.namespace, id_))
         #add entity and entity location to graph
         self.graph.add( (entity, RDF.type, PROV.Entity) )
         self.graph.add( (entity, PROV.atLocation, Literal(self.location)) ) 
@@ -80,7 +75,7 @@ class Provenance(object):
         """
         Creates provenance agent URI
         """
-        agent = URIRef("{}{}".format(PIT["agent"], agent))
+        agent = URIRef("{}{}".format(self.namespace, agent))
         #add agent to graph
         self.graph.add( (agent, RDF.type, PROV.Agent) )
         self.graph.add( (self.entity, PROV.wasAttributedTo, agent) )    
@@ -91,16 +86,12 @@ class Provenance(object):
         """
         base_activity = "{}/{}".format(agent, activity)
         id_ =  "{}/{}".format(base_activity, uuid.uuid4().hex)
-        base_activity_uri = URIRef("{}{}".format(PIT["activity"], base_activity))
-        activity_uri = URIRef("{}{}".format(PIT["activity"], id_))
-        #add activity to graph
+        activity_uri = URIRef("{}{}".format(self.namespace, id_))
         self.graph.add( (activity_uri, RDF.type, PROV.Activity) )
         if type(desc) == str:
             self.graph.add( (activity_uri, RDFS.label, Literal(desc)) ) 
         self.graph.add( (activity_uri, PROV.endedAtTime, Literal(datetime.now().isoformat(), datatype="xsd:dateTime")) )
         self.graph.add( (self.entity, PROV.wasGeneratedBy, activity_uri) )
-        #self.graph.add( (activity_uri, PROV.used, base_activity_uri) )
-
     def _get_root_entity(self):
         """
         Return the 'root' entity of the prov graph
@@ -116,25 +107,26 @@ class Provenance(object):
         else:
             return root[0]
         
-    def __init__(self, filepath, create_new=True):
+    def __init__(self, filepath, namespace=None, create_new=True):
         """
         Initialize object with provenance graph for file :filepath:
         If no provenance file is available create new provenance graph
         """
         self.graph = Graph()
-        self._set_up_context()
-
         self.file_name = os.path.basename(filepath)
 
         self.prov_filepath = "{}.prov".format(filepath)
         self.location = os.path.abspath(filepath)
         self.timestamp = datetime.now().isoformat()
 
+        self.namespace = namespace
+
         if not os.path.exists(self.prov_filepath):
 
             if create_new == False:
                 return None
 
+            self._set_up_context(namespace=namespace)
             self.init = True
             #generate new entity
             self.entity = self._generate_entity_node()
@@ -146,6 +138,7 @@ class Provenance(object):
             self.graph = g
             #set root entity
             self.entity = self._get_root_entity()
+            self.namespace = self.context["provit_ns"]
 
     def add(self, agent, activity, description):
         """
@@ -188,7 +181,7 @@ class Provenance(object):
         """
         Adds primary source (+ url and comment) to provenance information
         """
-        primary_source = URIRef("{}{}".format(PIT["entity"], primary_source))
+        primary_source = URIRef("{}{}".format(self.namespace, primary_source))
         self.graph.add( (primary_source, RDF.type, PROV.PrimarySource) )
         self.graph.add( (self.entity, PROV.hadPrimarySource, primary_source ) ) 
         if comment:
