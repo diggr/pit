@@ -31,13 +31,6 @@ from rdflib.namespace import RDF, FOAF, RDFS
 from .utils import load_jsonld
 
 
-def load_prov( filepath):
-    prov_filepath = "{}.prov".format(filepath)
-    if os.path.exists(prov_filepath):        
-        return Provenance(filepath)
-    else:
-        return None
-
 PROVIT_NS = "http://provit.diggr.link/"
 PROV = Namespace("http://www.w3.org/ns/prov#")
 

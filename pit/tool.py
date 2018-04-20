@@ -4,16 +4,27 @@ PIT command line client
 Usage:
 
 show provenance file information
-pit <filepath> 
+$ pit [options] FILE_PATH
 
 """
 
 import click
 import os
-import json
-import sys
-from pit.prov import Provenance, load_prov
+from pit.prov import Provenance
 import pprint
+
+
+def load_prov(filepath):
+    """
+    Loads a Provenance Object from the given file path or returns None if no (valid) provenance file was found.
+    :param filepath:
+    :return:
+    """
+    prov_filepath = "{}.prov".format(filepath)
+    if os.path.exists(prov_filepath):
+        return Provenance(filepath)
+    else:
+        return None
 
 
 @click.command()
@@ -25,14 +36,12 @@ import pprint
 @click.option("--sources", "-s", multiple=True, default="", help="Provenance information: Source files")
 @click.argument("filepath")
 def cli(agent, filepath, add, desc, activity, origin, sources):
-    
+
     pp = pprint.PrettyPrinter(indent=1)
 
     if not os.path.exists(filepath):
         print("Invalid filepath")
-        return 
-
-
+        return
 
     if not add:
         prov = load_prov(filepath)
@@ -50,10 +59,9 @@ def cli(agent, filepath, add, desc, activity, origin, sources):
             for source in sources:
                 prov.add_sources(source)
             prov.save()
-        
+
         if origin:
             prov.add_primary_source(origin)
             prov.save()
-        
+
     pp.pprint(prov.tree())
-            
