@@ -39,8 +39,11 @@ def cli(agent, filepath, add, desc, activity, origin, sources):
 
     pp = pprint.PrettyPrinter(indent=1)
 
-    if not os.path.exists(filepath):
-        print("Invalid filepath")
+    if not os.path.isfile(filepath):
+        if os.path.isdir(filepath):
+            print("Filepath must point to a file, not a directory.")
+        else:
+            print("Invalid filepath.")
         return
 
     if not add:
