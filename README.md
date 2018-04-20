@@ -22,14 +22,14 @@ Installation via [pip](https://pypi.org/) is recommended for end users. We stron
 Clone the repository and create a virtualenv.
 
 ```zsh
-git clone https://github.com/diggr/pit
-mkvirtualenv provit
+$ git clone https://github.com/diggr/pit
+$ mkvirtualenv provit
 ```
 
 Install it with pip
 
 ```zsh
-pip install PATH_TO_PIT_REPOSITORY 
+$ pip install PATH_TO_PIT_REPOSITORY 
 ```
 
 ### git / Development
@@ -37,14 +37,14 @@ pip install PATH_TO_PIT_REPOSITORY
 Clone the repository and create a virtualenv.
 
 ```zsh
-git clone https://github.com/diggr/pit
-mkvirtualenv provit
+$ git clone https://github.com/diggr/pit
+$ mkvirtualenv provit
 ```
 
 Install it with pip in *editable* mode
 
 ```zsh
-pip install -e PATH_TO_PIT_REPOSITORY 
+$ pip install -e PATH_TO_PIT_REPOSITORY 
 ```
 
 
@@ -59,7 +59,7 @@ and vocabulary shipped with *PIT* can be used within other applications.
 Usage: 
 
 ```zsh
-pit [OPTIONS] FILEPATH
+$ pit [OPTIONS] FILEPATH
 ```
 
 Options:
@@ -90,6 +90,52 @@ prov_dict = prov.tree()
 # save provenance metadata into "<filename>.prov" file
 prov.save()
 ```
+
+## Roadmap
+
+General Roadmap containing features we'd like to realize in the project
+
+1. Test Coverage 
+2. Browser-GUI
+3. Add Persons to Agent, to allow more granular activity tracking
+
+### Feature Wishlist
+
+A more detailed list of specific (smaller) features and functionality.
+
+#### Browser GUI to visualize Provenance Tree
+
+The browser based GUI should visualize the provenance as a graph, maybe using
+d3.js. 
+
+#### Notify user if source referenced file changes
+
+Provenance files contain the version of a file if referenced, if an older version
+(i.e. not the current version) of a file is referenced, a warning should 
+be displayed.
+
+#### File Browser
+
+A file browser showing e.g. all files with missing provenance.
+
+#### Reference Clustering
+
+Inspect files in your *research* folder, and display all references, 
+to identify clusters. This could help structuring a messy research directory
+without breaking scripts, or at least knowing, which scripts possibly need
+to be updated.
+
+## FAQ / Paradigms
+
+### Can I add multiple agents to an activity?
+
+No. The reason is: If you can distinguish the activities or impact of 
+the agent, then you have multiple agents with *multiple activities*. E.g.
+if you let three students help you proofreading a file and you get
+back *1* revised version, then the three students are *1 agent*
+as you cannot distinguish between their results. If you get back *3
+versions* you have *3 agents* and *3 activities*.
+
 
 ## License
 
