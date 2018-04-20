@@ -11,3 +11,6 @@ main.py
 .idea
 pit/test
 .pytest_cache
+
+# Sphinx Build Dir
+docs/build
