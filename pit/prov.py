@@ -74,6 +74,8 @@ class Provenance(object):
             self.context = context
             self.graph = g
             self.entity = self._get_root_entity()
+            if not "provit_ns" in context:
+                self.context["provit_ns"] = PROVIT_NS
             self.namespace = self.context["provit_ns"]            
         else:
             self._set_up_context(namespace=namespace)
@@ -230,10 +232,11 @@ class Provenance(object):
         activity = [ o for s,p,o in self.graph.triples( (root_entity, PROV.wasGeneratedBy, None) ) ]  
         if len(activity) > 0:
             ended_at = [ o for s,p,o in self.graph.triples( (activity[0], PROV.endedAtTime, None) ) ] 
+            ended_at = str(ended_at[0])[:19].replace("T", " ")
             desc = [ o for s,p,o in self.graph.triples( (activity[0], RDFS.label, None) ) ] 
         else:
             activity = [ "" ]
-            ended_at = [""]
+            ended_at = ""
             desc = [""]
         
 
@@ -269,7 +272,7 @@ class Provenance(object):
         tree["uri"] = str(root_entity)
         tree["agent"] =  str(agent[0])
         tree["activity"] = str(activity[0])
-        tree["ended_at"] =  str(ended_at[0])
+        tree["ended_at"] =  str(ended_at)
         tree["activity_desc"] = str(desc[0])
         tree["location"] = str(location[0])
         tree["primary_sources"] = primary_sources
