@@ -241,6 +241,7 @@ class Provenance(object):
         primary_sources = []
         for s,p,o in self.graph.triples( (root_entity, PROV.hadPrimarySource, None) ):
             uri = str(o)
+            slug = uri.split("/")[-1]
             url = [ o2 for s2,p2,o2 in self.graph.triples( (o, FOAF.homepage, None) ) ]
             if len(url) > 0:
                 url = str(url[0])
@@ -255,6 +256,7 @@ class Provenance(object):
             primary_sources.append({
                 "uri": uri,
                 "url": url,
+                "slug": slug,
                 "comment": comment
             })
 

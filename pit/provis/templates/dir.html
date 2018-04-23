@@ -25,7 +25,7 @@
                 <th>Filename</th>
                 <th>Last Process</th>
                 <th>Last Update</th>
-                <th>Origins</th>
+                <th>Primary Sources</th>
             </tr>
             {% for file in files %}
             <tr>
@@ -33,7 +33,9 @@
                 {% if file.prov is not none %}
                 <td>{{ file.prov.activity_desc }}</td>
                 <td>{{ file.prov.ended_at }}</td>
-                <td>{{ file.origins }}</td>
+                <td>{% for origin in file.origins %}
+                    <span class="label label-default">{{ origin }}</span>
+                {% endfor %}</td>
                 {% else %}
                 <td colspan="3" class="bg-warning">No provenance information available</td>
                 {% endif %}

@@ -21,7 +21,6 @@ def display_file_prov(filename):
         if prov:
             prov = prov.tree()
 
-        print(prov)
         return render_template("file_prov.html", abs_dir=abs_dir, filename=filename, prov=prov)
     else:
         return jsonify({"error": "file does not exist"})
@@ -43,6 +42,7 @@ def rootdirectory():
             #branches = prov.process_counts()
             if prov:
                 origins = prov.get_primary_sources()
+                origins = [ x.split("/")[-1] for x in origins ]
             else:
                 origins = None
             if prov:
@@ -54,7 +54,6 @@ def rootdirectory():
                 "origins": origins
             })
 
-        print(provs)
         return render_template("dir.html", abs_dir=abs_dir, files=provs)
     else:
         return jsonify({})

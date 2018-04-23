@@ -24,7 +24,11 @@
 
 
         <ul class="list-group">
-            <li class="list-group-item">Origin: {{prov.primary_sources}}</li>
+            <li class="list-group-item">Primary Sources: 
+                {% for primary_source in prov.primary_sources %}
+                    <span class="label label-default">{{ primary_source.slug }}</span>
+                {% endfor %}
+            </li>
             <li class="list-group-item">Date: {{prov.ended_at}}</li>
             <li class="list-group-item">Agent: {{prov.agent}}</li>
             <li class="list-group-item">Description: {{prov.activity_desc}}</li>
@@ -37,7 +41,11 @@
 
                     {% for source in prov.sources recursive %}
                         
-                        <li class="list-group-item">Origin: {{source.primary_sources}}</li>
+                        <li class="list-group-item">Primary Sources: 
+                            {% for primary_source in source.primary_sources %}
+                            <span class="label label-default">{{ primary_source.slug }}</span>
+                            {% endfor %}
+                        </li>
                         <li class="list-group-item">Date: {{source.ended_at}}</li>
                         <li class="list-group-item">Agent: {{source.agent}}</li>
                         <li class="list-group-item">Description: {{source.activity_desc}}</li>
