@@ -36,7 +36,7 @@ PROV = Namespace("http://www.w3.org/ns/prov#")
 
 
 
-def load_prov(filepath):
+def load_prov(filepath, namespace=PROVIT_NS):
     """
     Loads a Provenance Object from the given file path or returns None if no (valid) provenance file was found.
     :param filepath:
@@ -44,7 +44,7 @@ def load_prov(filepath):
     """
     prov_filepath = "{}.prov".format(filepath)
     if os.path.exists(prov_filepath):
-        return Provenance(filepath)
+        return Provenance(filepath, namespace=namespace)
     else:
         return None
 

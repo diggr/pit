@@ -10,7 +10,7 @@ $ pit [options] FILE_PATH
 
 import click
 import os
-from .prov import Provenance
+from .prov import Provenance, PROVIT_NS
 from .provis.provis import start_provis
 import pprint
 
@@ -36,8 +36,9 @@ def load_prov(filepath):
 @click.option("--origin", "-o", default="", help="Provenance information: Data origin")
 @click.option("--sources", "-s", multiple=True, default="", help="Provenance information: Source files")
 @click.option("--browser", "-b", is_flag=True, help="Provenance browser")
+@click.option("--namespace", "-n", default=PROVIT_NS, help="Provenance Namespace, default: {}".format(PROVIT_NS))
 @click.argument("filepath")
-def cli(agent, filepath, add, desc, activity, origin, sources, browser):
+def cli(agent, filepath, add, desc, activity, origin, sources, browser, namespace):
 
     pp = pprint.PrettyPrinter(indent=1)
 
@@ -52,13 +53,13 @@ def cli(agent, filepath, add, desc, activity, origin, sources, browser):
         return
 
     if not add:
-        prov = load_prov(filepath)
+        prov = load_prov(filepath, namespace=namespace)
         if not prov:
             print("No provenance Information available")
             return
 
     elif add:
-        prov = Provenance(filepath)
+        prov = Provenance(filepath, namespace=namespace)
         if agent and activity and desc:
             prov.add(agent=agent, activity=activity, description=desc)
             prov.save()
