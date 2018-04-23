@@ -34,6 +34,21 @@ from .utils import load_jsonld
 PROVIT_NS = "http://provit.diggr.link/"
 PROV = Namespace("http://www.w3.org/ns/prov#")
 
+
+
+def load_prov(filepath):
+    """
+    Loads a Provenance Object from the given file path or returns None if no (valid) provenance file was found.
+    :param filepath:
+    :return:
+    """
+    prov_filepath = "{}.prov".format(filepath)
+    if os.path.exists(prov_filepath):
+        return Provenance(filepath)
+    else:
+        return None
+
+
 class Provenance(object):
     """
     Provenance class handles the provenance metadata graph 
@@ -79,7 +94,7 @@ class Provenance(object):
             "rdfs": str(RDFS),
             "foaf": str(FOAF),
             "prov": "http://www.w3.org/ns/prov#", 
-            #"provit_ns": namespace
+            "provit_ns": namespace
         }
         self.namespace = namespace
 
@@ -98,7 +113,7 @@ class Provenance(object):
         """
         Creates provenance agent URI
         """
-        agent = URIRef("{}{}".format(self.namespace, agent))
+        agent = URIRef("{}agent/{}".format(self.namespace, agent))
         #add agent to graph
         self.graph.add( (agent, RDF.type, PROV.Agent) )
         self.graph.add( (self.entity, PROV.wasAttributedTo, agent) )    
@@ -253,7 +268,7 @@ class Provenance(object):
         tree["agent"] =  str(agent[0])
         tree["activity"] = str(activity[0])
         tree["ended_at"] =  str(ended_at[0])
-        tree["activitiy_desc"] = str(desc[0])
+        tree["activity_desc"] = str(desc[0])
         tree["location"] = str(location[0])
         tree["primary_sources"] = primary_sources
         tree["sources"] = sources

@@ -10,7 +10,8 @@ $ pit [options] FILE_PATH
 
 import click
 import os
-from pit.prov import Provenance
+from .prov import Provenance
+from .provis.provis import start_provis
 import pprint
 
 
@@ -34,10 +35,14 @@ def load_prov(filepath):
 @click.option("--desc", "-d", default="", help="Provenance information: Description of the data manipulation process")
 @click.option("--origin", "-o", default="", help="Provenance information: Data origin")
 @click.option("--sources", "-s", multiple=True, default="", help="Provenance information: Source files")
+@click.option("--browser", "-b", is_flag=True, help="Provenance browser")
 @click.argument("filepath")
-def cli(agent, filepath, add, desc, activity, origin, sources):
+def cli(agent, filepath, add, desc, activity, origin, sources, browser):
 
     pp = pprint.PrettyPrinter(indent=1)
+
+    if browser:
+        start_provis(browser, debug=True)
 
     if not os.path.isfile(filepath):
         if os.path.isdir(filepath):

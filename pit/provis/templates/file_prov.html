@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>PROVis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</head>
+<body>
+
+    <div class="col-sm-11">
+
+        <div class="page-header">
+            <h1>PROVis</h1>
+        </div>
+
+        <h3><a href="/">{{abs_dir}}</a> > {{filename}}</h3>
+
+
+        <ul class="list-group">
+            <li class="list-group-item">Origin: {{prov.primary_sources}}</li>
+            <li class="list-group-item">Date: {{prov.ended_at}}</li>
+            <li class="list-group-item">Agent: {{prov.agent}}</li>
+            <li class="list-group-item">Description: {{prov.activity_desc}}</li>
+            {%if prov.sources is not none %}
+            <li class="list-group-item  list-group-item-warning">
+                
+                Sources:
+                    <ul class="list-group">
+                    {% set count = [1] %}
+
+                    {% for source in prov.sources recursive %}
+                        
+                        <li class="list-group-item">Origin: {{source.primary_sources}}</li>
+                        <li class="list-group-item">Date: {{source.ended_at}}</li>
+                        <li class="list-group-item">Agent: {{source.agent}}</li>
+                        <li class="list-group-item">Description: {{source.activity_desc}}</li>
+
+                        {% if count[0] % 2 == 0 %}
+                        <li class="list-group-item  list-group-item-warning">
+                        {% else %}
+                        <li class="list-group-item  list-group-item-info">
+                        {% endif %}                        
+                            Sources:
+                            {% if source.sources %}
+                            <ul class="list-group">
+                                {% if count.append(count.pop() + 1) %}{% endif %}
+                                {{ loop(source.sources) }}
+                            </ul>
+                            {% else %}
+                            None
+                            {% endif %}
+                        </li>
+                        <li style="list-style: none; height:20px;"> </li>
+                    {% endfor %}
+                    </ul>
+
+
+            </li>
+            {% endif %}
+        </ul>
+
+    </div>
+  
+</body>
+
+</html>
