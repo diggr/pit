@@ -39,6 +39,36 @@ class Provenance(object):
     Provenance class handles the provenance metadata graph 
     """
 
+    def __init__(self, filepath, namespace=None, create_new=True):
+        """
+        Initialize object with provenance graph for file :filepath:
+        If no provenance file is available create new provenance graph
+        """
+        self.graph = Graph()
+        self.file_name = os.path.basename(filepath)
+
+        self.prov_filepath = "{}.prov".format(filepath)
+        self.location = os.path.abspath(filepath)
+        self.timestamp = datetime.now().isoformat()
+
+        self.namespace = namespace
+
+        g, context = load_jsonld(self.prov_filepath)
+        if g and context:
+            self.init = False
+            self.context = context
+            self.graph = g
+            self.entity = self._get_root_entity()
+            self.namespace = self.context["provit_ns"]            
+        else:
+            self._set_up_context(namespace=namespace)
+            self.init = True
+            if create_new:
+                self.entity = self._generate_entity_node()
+            else:
+                self.entity = None
+   
+
     def _set_up_context(self, namespace):
         """
         Initializes Namespaces and JSON-LD context
@@ -49,7 +79,7 @@ class Provenance(object):
             "rdfs": str(RDFS),
             "foaf": str(FOAF),
             "prov": "http://www.w3.org/ns/prov#", 
-            "provit_ns": namespace
+            #"provit_ns": namespace
         }
         self.namespace = namespace
 
@@ -85,6 +115,7 @@ class Provenance(object):
             self.graph.add( (activity_uri, RDFS.label, Literal(desc)) ) 
         self.graph.add( (activity_uri, PROV.endedAtTime, Literal(datetime.now().isoformat(), datatype="xsd:dateTime")) )
         self.graph.add( (self.entity, PROV.wasGeneratedBy, activity_uri) )
+
     def _get_root_entity(self):
         """
         Return the 'root' entity of the prov graph
@@ -100,43 +131,13 @@ class Provenance(object):
         else:
             return root[0]
         
-    def __init__(self, filepath, namespace=None, create_new=True):
-        """
-        Initialize object with provenance graph for file :filepath:
-        If no provenance file is available create new provenance graph
-        """
-        self.graph = Graph()
-        self.file_name = os.path.basename(filepath)
-
-        self.prov_filepath = "{}.prov".format(filepath)
-        self.location = os.path.abspath(filepath)
-        self.timestamp = datetime.now().isoformat()
-
-        self.namespace = namespace
-
-        if not os.path.exists(self.prov_filepath):
-
-            if create_new == False:
-                return None
-
-            self._set_up_context(namespace=namespace)
-            self.init = True
-            #generate new entity
-            self.entity = self._generate_entity_node()
-        else:
-            self.init = False
-            #load and parse provenance json-ld file
-            g, context = load_jsonld(self.prov_filepath)
-            self.context = context
-            self.graph = g
-            #set root entity
-            self.entity = self._get_root_entity()
-            self.namespace = self.context["provit_ns"]
-
     def add(self, agent, activity, description):
         """
         Add new basic provenance information (agent, activity) to file
         """
+        if not self.entity:
+            self.entity = self._generate_entity_node()
+
         if not self.init:
             #create new entity
             prior_entity = self.entity
