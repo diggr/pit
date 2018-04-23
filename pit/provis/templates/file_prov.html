@@ -6,13 +6,17 @@
     <title>PROVis</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-  <!-- Latest compiled and minified JavaScript -->
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
-  <style>
-        .list-group-item {color: #444;}
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+
+    <style>
+            .list-group-item {color: #444;}
     </style>
 
 </head>
@@ -38,13 +42,20 @@
             <li class="list-group-item">Agent: {{prov.agent}}</li>
             <li class="list-group-item">Description: {{prov.activity_desc}}</li>
             {%if prov.sources is not none %}
-            <li class="list-group-item  list-group-item-warning">
+            <li class="list-group-item">
                 
-                Sources:
-                    <ul class="list-group">
-                    {% set count = [1] %}
+                <a class="btn btn-light" data-toggle="collapse" href="#sources-0" role="button" aria-expanded="false" aria-controls="sources-0">
+                    <b>Sources</b>
+                </a>
 
+                <div class="collapse" id="sources-0">
+
+                 
+                    <ul class="list-group" class="collapse">
+
+                    {% set count = [1] %}                 
                     {% for source in prov.sources recursive %}
+
                         {% if count[0] % 2 == 0 %}
                         <li class="list-group-item  list-group-item-warning">
                         {% else %}
@@ -62,24 +73,27 @@
                         <li class="list-group-item">Agent: {{source.agent}}</li>
                         <li class="list-group-item">Description: {{source.activity_desc}}</li>
 
-                        {% if count[0] % 2 == 0 %}
-                        <li class="list-group-item  list-group-item-warning">
-                        {% else %}
-                        <li class="list-group-item  list-group-item-info">
-                        {% endif %}                        
-                            Sources:
-                            {% if source.sources %}
-                            <ul class="list-group">
-                                {% if count.append(count.pop() + 1) %}{% endif %}
-                                {{ loop(source.sources) }}
-                            </ul>
-                            {% else %}
-                            None
-                            {% endif %}
+
+                        <li class="list-group-item ">
+                      
+
+                            <a class="btn btn-light" data-toggle="collapse" href="#sources-{{count[0]}}" role="button" aria-expanded="false" aria-controls="sources-{{count[0]}}">
+                                <b>Sources</b>
+                            </a>
+
+                            <div id="sources-{{count[0]}}" class="collapse">
+                                <ul class="list-group">
+                                    {% if count.append(count.pop() + 1) %}{% endif %}
+                                    {{ loop(source.sources) }}
+                                </ul>
+                            </div>
+     
                         </li>
                         <li style="list-style: none; height:20px;"> </li>
                     {% endfor %}
                     </ul>
+
+                </div>
 
 
             </li>
