@@ -10,9 +10,11 @@ $ pit [options] FILE_PATH
 
 import click
 import os
+import pprint
+import sys
 from .prov import Provenance, PROVIT_NS
 from .provis.provis import start_provis
-import pprint
+
 
 
 def load_prov(filepath):
@@ -43,7 +45,8 @@ def cli(agent, filepath, add, desc, activity, origin, sources, browser, namespac
     pp = pprint.PrettyPrinter(indent=1)
 
     if browser:
-        start_provis(browser, debug=True)
+        start_provis(filepath, debug=True)
+        sys.exit(0)
 
     if not os.path.isfile(filepath):
         if os.path.isdir(filepath):

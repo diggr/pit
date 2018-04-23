@@ -1,11 +1,22 @@
 import os
 import sys
+import time
+import webbrowser
+import logging
+
+from blinker import Signal
 from ..prov import load_prov
 
 from flask import Flask, jsonify, render_template
 app = Flask(__name__)
 
+# Disable all console logging
+app.logger.disabled = True
+log = logging.getLogger('werkzeug')
+log.disabled = True
+
 STD_DIR = "."
+PROVIS_PORT = 5555
 
 def path(filename):
     return os.path.join(STD_DIR, filename)
@@ -58,10 +69,16 @@ def rootdirectory():
     else:
         return jsonify({})
 
-def start_provis(directory, debug=False):
-    app.run(debug=debug)
 
-# if __name__ == "__main__":
-#     if len(sys.argv) > 1:
-#         STD_DIR = sys.argv[1]
-#     app.run(debug=True)
+def start_provis(directory, debug=False):
+    n = os.fork()
+    if n>0:
+        try:
+            app.run(debug=debug, port=PROVIS_PORT, use_reloader=False)
+        except OSError as e:
+            print("Cannot start provis server.")
+            sys.exit(1)
+    else:
+        time.sleep(1)
+        webbrowser.open("http://localhost:{}".format(PROVIS_PORT))
+
