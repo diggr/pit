@@ -22,17 +22,16 @@
 </head>
 <body>
     
-
     <div class="col-sm-11">
 
         <div class="page-header">
             <h1>PROVis</h1>
         </div>
 
-        <h3><a href="/">{{abs_dir}}</a> > {{filename}}</h3>
-
-
         <ul class="list-group">
+            <li class="list-group-item  list-group-item-warning">
+                <h3><a href="/">{{abs_dir}}</a> > {{filename}}</h3>
+            </li>
             <li class="list-group-item">Primary Sources: 
                 {% for primary_source in prov.primary_sources %}
                     <span class="label label-default">{{ primary_source.slug }}</span>
