@@ -13,7 +13,7 @@ with open(join(base_path, "requirements.txt")) as req_file:
     requirements = req_file.readlines()
 
 setup(
-    name="pit",
+    name="provit",
     description='A a light, dezentralized provenance tracking framework using the W3C PROV-O vocabulary',
     long_description=readme,
     license="MIT",
