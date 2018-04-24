@@ -20,5 +20,7 @@ dist/
 *.so
 *~
 
+.pypirc
+
 # Sphinx Build Dir
 docs/build
