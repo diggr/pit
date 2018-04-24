@@ -1,5 +1,4 @@
 testdata/
-pit.egg-info/
 *.prov
 *.ttl
 *.png
@@ -11,6 +10,15 @@ main.py
 .idea
 pit/test
 .pytest_cache
+
+
+build/
+dist/
+*.egg-info/
+*.egg
+*.py[cod]
+*.so
+*~
 
 # Sphinx Build Dir
 docs/build
