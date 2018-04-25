@@ -4,7 +4,6 @@ import time
 import webbrowser
 import logging
 
-from blinker import Signal
 from ..prov import load_prov
 
 from flask import Flask, jsonify, render_template
