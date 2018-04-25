@@ -26,7 +26,7 @@ setup(
         },
     version="0.2",
     py_modules=["tool", "pit"],
-    install_requires=["Click", "prov[dot]", ],
+    install_requires=requirements,
     include_package_data=True,
     entry_points="""
         [console_scripts]
