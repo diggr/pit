@@ -76,17 +76,16 @@ Usage:
 
 Options:
 
---add                       Add provenance information layer to file
--a, --agent=TEXT            Provenance information: agent
---activity=TEXT             Provenance information: activity
--d, --desc=TEXT             Provenance information: Description
+--add    Add provenance information layer to file
+-a AGENT, --agent AGENT    Provenance information: agent
+--activity ACTIVITY        Provenance information: activity
+-d DESCRIPTION, --desc DESCRIPTION     Provenance information: Description
                             of the data manipulation process
--o, --origin=TEXT           Provenance information: Data origin
--s, --sources=TEXT          Provenance information: Source files
--b, --browser               Provenance browser
--n, --namespace=TEXT        Provenance Namespace,
-                            default: http://provit.diggr.link/
---help                      Show this message and exit.
+-o ORIGIN, --origin ORIGIN    Provenance information: Data origin
+-s SOURCES, --sources SOURCES    Provenance information: Source files
+-b, --browser     Provenance browser
+-n NAMESPACE, --namespace NAMESPACE    Provenance Namespace, default: http://provit.diggr.link/
+--help      Show this message and exit.
 
 Provenance Class
 ~~~~~~~~~~~~~~~~
