@@ -1,0 +1,7 @@
+include LICENSE
+
+include pit/provis/templates/*.html
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+
