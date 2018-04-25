@@ -12,22 +12,8 @@ import click
 import os
 import pprint
 import sys
-from .prov import Provenance, PROVIT_NS
+from .prov import Provenance, load_prov, PROVIT_NS
 from .provis.provis import start_provis
-
-
-
-def load_prov(filepath):
-    """
-    Loads a Provenance Object from the given file path or returns None if no (valid) provenance file was found.
-    :param filepath:
-    :return:
-    """
-    prov_filepath = "{}.prov".format(filepath)
-    if os.path.exists(prov_filepath):
-        return Provenance(filepath)
-    else:
-        return None
 
 
 @click.command()
