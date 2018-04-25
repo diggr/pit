@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
 from rdflib import Graph
-#from .prov import Provenance
 import json
 import os
-
 
 
 def load_jsonld(filepath):
@@ -20,7 +18,7 @@ def load_jsonld(filepath):
     with open(filepath) as f:
         file_data = json.load(f)
 
-    #check for emtpy prov file
+    # check for emtpy prov file
     if not file_data:
         return (None, None)
 

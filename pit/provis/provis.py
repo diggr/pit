@@ -17,8 +17,10 @@ log.disabled = True
 STD_DIR = "."
 PROVIS_PORT = 5555
 
+
 def path(filename):
     return os.path.join(STD_DIR, filename)
+
 
 @app.route("/<filename>")
 def display_file_prov(filename):
@@ -35,6 +37,7 @@ def display_file_prov(filename):
     else:
         return jsonify({"error": "file does not exist"})
 
+
 @app.route('/')
 def rootdirectory():
 
@@ -43,16 +46,16 @@ def rootdirectory():
     if os.path.exists(STD_DIR):
         directory = os.listdir(STD_DIR)
 
-        directories = [ x for x in directory if os.path.isdir(path(x)) ]
-        files = [ x for x in directory if os.path.isfile(path(x)) and x.split(".")[-1] != "prov" ]
+        # directories = [x for x in directory if os.path.isdir(path(x))]
+        files = [x for x in directory if os.path.isfile(path(x)) and x.split(".")[-1] != "prov"]
 
         provs = []
         for f in files:
             prov = load_prov(path(f))
-            #branches = prov.process_counts()
+            # branches = prov.process_counts()
             if prov:
                 origins = prov.get_primary_sources()
-                origins = [ x.split("/")[-1] for x in origins ]
+                origins = [x.split("/")[-1] for x in origins]
             else:
                 origins = None
             if prov:
@@ -71,7 +74,7 @@ def rootdirectory():
 
 def start_provis(directory, debug=False):
     n = os.fork()
-    if n>0:
+    if n > 0:
         try:
             app.run(debug=debug, port=PROVIS_PORT, use_reloader=False)
         except OSError as e:
@@ -80,4 +83,3 @@ def start_provis(directory, debug=False):
     else:
         time.sleep(1)
         webbrowser.open("http://localhost:{}".format(PROVIS_PORT))
-
