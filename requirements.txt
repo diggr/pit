@@ -2,3 +2,4 @@ setuptools==36.5.0
 click==6.7
 rdflib==4.2.2
 Flask==0.12.2
+blinker==1.4
