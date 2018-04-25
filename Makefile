@@ -33,6 +33,6 @@ testupload: dist
 	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 release: dist
-	twine upload upload dist/*
+	twine upload dist/*
 
 
