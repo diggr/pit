@@ -6,7 +6,7 @@ from os.path import dirname, abspath, join
 
 base_path = dirname(abspath(__file__))
 
-with open(join(base_path, "README.md")) as readme_file:
+with open(join(base_path, "README.rst")) as readme_file:
     readme = readme_file.read()
 
 with open(join(base_path, "requirements.txt")) as req_file:
