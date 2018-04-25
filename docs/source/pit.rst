@@ -1,6 +1,13 @@
 pit package
 ===========
 
+Subpackages
+-----------
+
+.. toctree::
+
+    pit.provis
+
 Submodules
 ----------
 
