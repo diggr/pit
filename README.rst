@@ -1,7 +1,7 @@
 P(ROV)IT - PROVenance integration tools
 =======================================
 
-|Python 3.6| |GitHub license| |GitHub issues|
+|Python 3.6| |GitHub license| |GitHub issues| |Docs passing|
 
 PROVIT is a light, dezentralized provenance tracking framework. It allows
 the user to track workflows and modifications of data and files. A
@@ -10,6 +10,8 @@ vocabulary <https://www.w3.org/TR/prov-o/>`__ is implemented. Its aim is to
 provided an easy to use interface for users who have never worked with provenance
 tracking before. It you feel limited by PROVIT you should have a look at
 the more extensive implementation `prov <https://github.com/trungdong/prov/>`__.
+
+Full documentation is available under: `provit.readthedocs.io <https://provit.readthedocs.io/en/latest/>`__.
 
 Requirements
 ------------
@@ -165,4 +167,6 @@ Overview
 .. |GitHub license| image:: https://img.shields.io/github/license/diggr/pit.svg
    :target: https://github.com/diggr/pit/blob/master/LICENSE
 .. |GitHub issues| image:: https://img.shields.io/github/issues/diggr/pit.svg
-   :target: https://github.com/diggr/pit/issues
+   :target: https://github.com/diggr/provit/issues
+.. |Docs passing| image:: https://readthedocs.org/projects/provit/badge/?version=latest
+   :target: http://provit.readthedocs.io/en/latest/?badge=latest
