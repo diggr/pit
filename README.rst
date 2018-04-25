@@ -77,12 +77,13 @@ Options:
 --add                   Add provenance information layer to file
 -a, --agent TEXT        Provenance information: agent
 --activity TEXT         Provenance information: activity
--d, --desc TEXT         Provenance information: Description of the data manipulation process
+-d, --desc TEXT         Provenance information: Description
+                        of the data manipulation process
 -o, --origin TEXT       Provenance information: Data origin
 -s, --sources TEXT      Provenance information: Source files
 -b, --browser           Provenance browser
--n, --namespace TEXT    Provenance Namespace, default:
-                        http://provit.diggr.link/
+-n, --namespace TEXT    Provenance Namespace,
+                        default: http://provit.diggr.link/
 --help                  Show this message and exit.
 
 Provenance Class
@@ -154,13 +155,11 @@ you have *3 agents* and *3 activities*.
 Overview
 --------
 
-
-
+:Authors:
+    P. Mühleder muehleder@ub.uni-leipzig.de,
+    F. Rämisch raemisch@ub.uni-leipzig.de
 :License: MIT
 :Copyright: 2018, Peter Mühleder and `Universitätsbibliothek Leipzig <https://ub.uni-leipzig.de>`__
-
--  P. Mühleder muehleder@ub.uni-leipzig.de
--  F. Rämisch raemisch@ub.uni-leipzig.de
 
 .. |Python 3.6| image:: https://img.shields.io/badge/Python-3.6-blue.svg
 .. |GitHub license| image:: https://img.shields.io/github/license/diggr/pit.svg
