@@ -14,7 +14,7 @@ with open(join(base_path, "requirements.txt")) as req_file:
 
 setup(
     name="provit",
-    description='A a light, dezentralized provenance tracking framework using the W3C PROV-O vocabulary',
+    description='A light, dezentralized provenance tracking framework using the W3C PROV-O vocabulary',
     long_description=readme,
     license="MIT",
     author='Diggr Team',
