@@ -18,6 +18,11 @@ clean:
 
 lint:
 	flake8 pit
+	flake8 setup.py
+	flake8 test_pit.py
+
+test:
+	python setup.py test
 
 docs:
 	rm -f docs/source/pit.rst
@@ -26,7 +31,7 @@ docs:
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 
-dist: 	clean
+dist: 	clean lint test
 	python setup.py sdist bdist_wheel
 
 testupload: dist
