@@ -37,15 +37,16 @@ def cli(agent, filepath, add, desc, activity, origin, sources, browser, namespac
     if not os.path.isfile(filepath):
         if os.path.isdir(filepath):
             print("Filepath must point to a file, not a directory.")
+            sys.exit(1)
         else:
             print("Invalid filepath.")
-        return
+            sys.exit(2)
 
     if not add:
         prov = load_prov(filepath, namespace=namespace)
         if not prov:
             print("No provenance Information available")
-            return
+            sys.exit(0)
 
     elif add:
         prov = Provenance(filepath, namespace=namespace)
