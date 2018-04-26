@@ -27,6 +27,13 @@ setup(
     version="0.2.2",
     py_modules=["tool", "pit"],
     install_requires=requirements,
+    setup_requires=[
+        'pytest-runner',
+    ],
+    tests_require=[
+        'pytest',
+    ],
+    test_suite="pytest",
     include_package_data=True,
     entry_points="""
         [console_scripts]
@@ -56,6 +63,3 @@ setup(
         'PROV-XML', 'PROV-N', 'PROV-O', 'RDF', "JSON-LD"
     ],
 )
-
-
-
