@@ -52,7 +52,7 @@ class Provenance(object):
     Provenance class handles the provenance metadata graph
     """
 
-    def __init__(self, filepath, namespace=None, create_new=True):
+    def __init__(self, filepath, namespace=None, create_new=True, overwrite=False):
         """
         Initialize object with provenance graph for file :filepath:
         If no provenance file is available create new provenance graph
@@ -66,22 +66,28 @@ class Provenance(object):
 
         self.namespace = namespace
 
-        g, context = load_jsonld(self.prov_filepath)
-        if g and context:
-            self.init = False
-            self.context = context
-            self.graph = g
-            self.entity = self._get_root_entity()
-            if "provit_ns" not in context:
-                self.context["provit_ns"] = PROVIT_NS
-            self.namespace = self.context["provit_ns"]
-        else:
+        if overwrite:
             self._set_up_context(namespace=namespace)
             self.init = True
-            if create_new:
-                self.entity = self._generate_entity_node()
+            self.entity = self._generate_entity_node()
+
+        else:            
+            g, context = load_jsonld(self.prov_filepath)
+            if g and context:
+                self.init = False
+                self.context = context
+                self.graph = g
+                self.entity = self._get_root_entity()
+                if "provit_ns" not in context:
+                    self.context["provit_ns"] = PROVIT_NS
+                self.namespace = self.context["provit_ns"]
             else:
-                self.entity = None
+                self._set_up_context(namespace=namespace)
+                self.init = True
+                if create_new:
+                    self.entity = self._generate_entity_node()
+                else:
+                    self.entity = None
 
     def _build_location_string(self, filepath):
         """
