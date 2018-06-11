@@ -14,9 +14,11 @@ import pprint
 import sys
 from .prov import Provenance, load_prov, PROVIT_NS
 from .provis.provis import start_provis
+from .config import init_dir, load_config
 
 
 @click.command()
+@click.option("--init", "-i", is_flag=True, help="Add provenance configuration for current directory")
 @click.option("--add", is_flag=True, help="Add provenance information layer to file")
 @click.option("--agent", "-a", default="", help="Provenance information: agent")
 @click.option("--activity", default="", help="Provenane information: activity")
@@ -25,8 +27,8 @@ from .provis.provis import start_provis
 @click.option("--sources", "-s", multiple=True, default="", help="Provenance information: Source files")
 @click.option("--browser", "-b", is_flag=True, help="Provenance browser")
 @click.option("--namespace", "-n", default=PROVIT_NS, help="Provenance Namespace, default: {}".format(PROVIT_NS))
-@click.argument("filepath")
-def cli(agent, filepath, add, desc, activity, origin, sources, browser, namespace):
+@click.argument("filepath", required=False)
+def cli(agent, init, filepath, add, desc, activity, origin, sources, browser, namespace):
 
     pp = pprint.PrettyPrinter(indent=1)
 
@@ -34,33 +36,38 @@ def cli(agent, filepath, add, desc, activity, origin, sources, browser, namespac
         start_provis(filepath, debug=True)
         sys.exit(0)
 
-    if not os.path.isfile(filepath):
-        if os.path.isdir(filepath):
-            print("Filepath must point to a file, not a directory.")
-            sys.exit(1)
-        else:
-            print("Invalid filepath.")
-            sys.exit(2)
+    if init:
+        init_dir()
+        #print(load_config())
 
-    if not add:
-        prov = load_prov(filepath, namespace=namespace)
-        if not prov:
-            print("No provenance Information available")
-            sys.exit(0)
+    if filepath:
+        if not os.path.isfile(filepath):
+            if os.path.isdir(filepath):
+                print("Filepath must point to a file, not a directory.")
+                sys.exit(1)
+            else:
+                print("Invalid filepath.")
+                sys.exit(2)
 
-    elif add:
-        prov = Provenance(filepath, namespace=namespace)
-        if agent and activity and desc:
-            prov.add(agent=agent, activity=activity, description=desc)
-            prov.save()
+        if not add:
+            prov = load_prov(filepath, namespace=namespace)
+            if not prov:
+                print("No provenance Information available")
+                sys.exit(0)
 
-        if sources:
-            for source in sources:
-                prov.add_sources(source)
-            prov.save()
+        elif add:
+            prov = Provenance(filepath, namespace=namespace)
+            if agent and activity and desc:
+                prov.add(agent=agent, activity=activity, description=desc)
+                prov.save()
 
-        if origin:
-            prov.add_primary_source(origin)
-            prov.save()
+            if sources:
+                for source in sources:
+                    prov.add_sources(source)
+                prov.save()
 
-    pp.pprint(prov.tree())
+            if origin:
+                prov.add_primary_source(origin)
+                prov.save()
+
+        pp.pprint(prov.tree())

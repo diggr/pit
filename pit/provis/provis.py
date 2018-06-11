@@ -5,6 +5,7 @@ import webbrowser
 import logging
 
 from ..prov import load_prov
+from ..config import pit_filepath
 
 from flask import Flask, jsonify, render_template
 app = Flask(__name__)
@@ -22,6 +23,9 @@ def path(filename):
     return os.path.join(STD_DIR, filename)
 
 
+
+
+
 @app.route("/<filename>")
 def display_file_prov(filename):
     abs_dir = os.path.abspath(STD_DIR)
@@ -33,7 +37,7 @@ def display_file_prov(filename):
         if prov:
             prov = prov.tree()
 
-        return render_template("file_prov.html", abs_dir=abs_dir, filename=filename, prov=prov)
+        return render_template("file_prov.html", abs_dir=pit_filepath(abs_dir), filename=filename, prov=prov)
     else:
         return jsonify({"error": "file does not exist"})
 
@@ -67,7 +71,7 @@ def rootdirectory():
                 "origins": origins
             })
 
-        return render_template("dir.html", abs_dir=abs_dir, files=provs)
+        return render_template("dir.html", abs_dir=pit_filepath(abs_dir), files=provs)
     else:
         return jsonify({})
 

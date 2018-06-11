@@ -4,7 +4,6 @@ from rdflib import Graph
 import json
 import os
 
-
 def load_jsonld(filepath):
     """
     Reads json-ld file and returns (rdfslib) graph and context
@@ -34,3 +33,24 @@ def load_jsonld(filepath):
 
     g = Graph().parse(data=json.dumps(graph), format="json-ld", context=context)
     return (g, context)
+
+def walk_up(start_dir):
+    """
+    Walks up directory tree from :start_dir: and returns directory paths
+    """
+    up_dir = os.path.abspath(start_dir)
+    yield up_dir
+    
+    while up_dir != "/":
+        up_dir = os.path.split(up_dir)[0]
+        yield up_dir
+
+def pit_filepath (filepath):
+    root_dir, config = load_config(filepath)
+    
+    if not root_dir:
+        return os.path.abspath(filepath)
+
+    rel_path = os.path.relpath(filepath, root_dir)
+    #print(config, rel_path)
+    return "{}:{}".format(config, rel_path)            

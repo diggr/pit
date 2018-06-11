@@ -28,7 +28,7 @@ from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, FOAF, RDFS
 
 from .utils import load_jsonld
-
+from .config import pit_filepath
 
 PROVIT_NS = "http://provit.diggr.link/"
 PROV = Namespace("http://www.w3.org/ns/prov#")
@@ -61,7 +61,7 @@ class Provenance(object):
         self.file_name = os.path.basename(filepath)
 
         self.prov_filepath = "{}.prov".format(filepath)
-        self.location = os.path.abspath(filepath)
+        self.location = pit_filepath(filepath)
         self.timestamp = datetime.now().isoformat()
 
         self.namespace = namespace
@@ -82,6 +82,21 @@ class Provenance(object):
                 self.entity = self._generate_entity_node()
             else:
                 self.entity = None
+
+    def _build_location_string(self, filepath):
+        """
+        Builds file location literal. If .pit file exists, config + relative path from .pit file will be returned,
+        If no .pit file exists, absolute path of the file will returned
+        """
+        root_dir, config = load_config(filepath)
+        
+        if not root_dir:
+            return os.path.abspath(filepath)
+
+        rel_path = os.path.relpath(filepath, root_dir)
+        #print(config, rel_path)
+        return "{}:{}".format(config, rel_path)
+
 
     def _set_up_context(self, namespace):
         """
