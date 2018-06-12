@@ -23,9 +23,6 @@ def path(filename):
     return os.path.join(STD_DIR, filename)
 
 
-
-
-
 @app.route("/<filename>")
 def display_file_prov(filename):
     abs_dir = os.path.abspath(STD_DIR)

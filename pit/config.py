@@ -5,7 +5,7 @@ def init_dir():
     """
     Creates .pit file in directory root with costum directory uri
     """
-    directory_uri = input("URI for current directory: ")
+    directory_uri = input("Identifier for current directory: ")
     with open(".pit", "w") as f:
         f.write(directory_uri)
 
