@@ -15,10 +15,12 @@ import sys
 from .prov import Provenance, load_prov, PROVIT_NS
 from .provis.provis import start_provis
 from .config import init_dir, load_config
+from .check import check_dir
 
 
 @click.command()
 @click.option("--init", "-i", is_flag=True, help="Add provenance configuration for current directory")
+@click.option("--check", "-c", is_flag=True, help="Checks provenance of all files in directory")
 @click.option("--add", is_flag=True, help="Add provenance information layer to file")
 @click.option("--agent", "-a", default="", help="Provenance information: agent")
 @click.option("--activity", default="", help="Provenane information: activity")
@@ -28,7 +30,7 @@ from .config import init_dir, load_config
 @click.option("--browser", "-b", is_flag=True, help="Provenance browser")
 @click.option("--namespace", "-n", default=PROVIT_NS, help="Provenance Namespace, default: {}".format(PROVIT_NS))
 @click.argument("filepath", required=False)
-def cli(agent, init, filepath, add, desc, activity, origin, sources, browser, namespace):
+def cli(agent, init, check, filepath, add, desc, activity, origin, sources, browser, namespace):
 
     pp = pprint.PrettyPrinter(indent=1)
 
@@ -39,6 +41,9 @@ def cli(agent, init, filepath, add, desc, activity, origin, sources, browser, na
     if init:
         init_dir()
         #print(load_config())
+
+    if check:
+        check_dir(".")
 
     if filepath:
         if not os.path.isfile(filepath):

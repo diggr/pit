@@ -309,3 +309,10 @@ class Provenance(object):
         """
         primary_sources = [str(o) for s, p, o in self.graph.triples((None, PROV.hadPrimarySource, None))]
         return list(set(primary_sources))
+    
+    def get_current_location(self):
+        """
+        Returs the file location of root element
+        """
+        return self.graph.value(self.entity, PROV.atLocation)
+        
