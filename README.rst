@@ -28,18 +28,13 @@ users. We strongly encourage end users to make use of a
 pip
 ~~~
 
-Clone the repository and create a virtualenv.
+Clone the repository and create a virtual environment (optional) and install into with pip into the virtualenv.
 
 .. code:: zsh
 
-    $ git clone https://github.com/diggr/pit
+    $ git clone https://github.com/diggr/provit
     $ mkvirtualenv provit
-
-Install it with pip
-
-.. code:: zsh
-
-    $ pip install PATH_TO_PROVIT_REPOSITORY
+    $ pip install ./provit
 
 git / Development
 ~~~~~~~~~~~~~~~~~
@@ -55,7 +50,7 @@ Install it with pip in *editable* mode
 
 .. code:: zsh
 
-    $ pip install -e PATH_TO_PROVI_REPOSITORY
+    $ pip install -e ./provit
 
 Usage
 -----
