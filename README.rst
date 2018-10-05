@@ -43,7 +43,7 @@ Clone the repository and create a virtualenv.
 
 .. code:: zsh
 
-    $ git clone https://github.com/diggr/pit
+    $ git clone https://github.com/diggr/provit
     $ mkvirtualenv provit
 
 Install it with pip in *editable* mode
