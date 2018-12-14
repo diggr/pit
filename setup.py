@@ -24,7 +24,7 @@ setup(
     package_dir={
             'pit': 'pit'
         },
-    version="0.2.2",
+    version="0.2.3",
     py_modules=["tool", "pit"],
     install_requires=requirements,
     setup_requires=[
