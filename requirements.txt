@@ -1,6 +1,6 @@
 rdflib==4.2.2
 Flask==0.12.2
-setuptools==40.6.3
 click==6.7
+setuptools==40.6.3
 flask_cors==3.0.7
 PyYAML==3.13

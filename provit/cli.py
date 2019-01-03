@@ -1,10 +1,10 @@
 """
-PIT command line client
+PROVIT command line client
 
 Usage:
 
 show provenance file information
-$ pit [options] FILE_PATH
+$ provit [options] FILE_PATH
 
 """
 
@@ -12,13 +12,66 @@ import click
 import os
 import pprint
 import sys
-from .prov import Provenance, load_prov, PROVIT_NS
-from .provis.provis import start_provis
-from .config import init_dir, load_config
-from .check import check_dir
+from .prov import Provenance, load_prov
+from .browser import start_browser
+from .home import add_directory
+from .agent import load_agent_profile
+
+@click.group()
+def cli():
+    pass
+
+@cli.command()
+@click.argument("directory", default="")
+def browser(directory):
+    if directory:
+        if os.path.exists(directory):
+            add_directory(os.path.abspath(directory))
+        else:
+            print("Invalid directory")
+            sys.exit(1)
+    start_browser()
+
+@cli.command()
+@click.argument("filepath")
+@click.option("--agents", "-a", multiple=True, default="", help="Provenance information: agent")
+@click.option("--activity", default="", help="Provenane information: activity")
+@click.option("--comment", "-c", default="", help="Provenance information: Description of the data manipulation process")
+@click.option("--origin", "-o", default="", help="Provenance information: Data origin")
+@click.option("--sources", "-s", multiple=True, default="", help="Provenance information: Source files")
+def add(filepath, agents, activity, comment, sources, origin):
+    if not os.path.exists(filepath):
+        print("Invalid filepath")
+        sys.exit(1)
+
+    prov = Provenance(filepath)
+    if agents and activity and comment:
+        prov.add(agents=agents, activity=activity, description=comment)
+        prov.save()
+
+        for agent in agents: 
+            agent_profile = load_agent_profile(agent)
+            if agent_profile:
+                prov.add_graph(agent_profile.graph())
+                prov.save()
+
+    if sources:
+        for source in sources:
+            prov.add_sources(source)
+        prov.save()
+
+    if origin:
+        prov.add_primary_source(origin)
+
+        agent_profile = load_agent_profile(origin)
+        if agent_profile:
+            prov.add_graph(agent_profile.graph())
 
 
-@click.command()
+        prov.save()
+
+
+''' @click.command()
 @click.option("--init", "-i", is_flag=True, help="Add provenance configuration for current directory")
 @click.option("--check", "-c", is_flag=True, help="Checks provenance of all files in directory")
 @click.option("--add", is_flag=True, help="Add provenance information layer to file")
@@ -76,3 +129,4 @@ def cli(agent, init, check, filepath, add, desc, activity, origin, sources, brow
                 prov.save()
 
         pp.pprint(prov.tree())
+ '''

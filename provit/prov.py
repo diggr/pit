@@ -27,14 +27,12 @@ from datetime import datetime
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, FOAF, RDFS
 
+from .namespaces import PROV, PROVIT
 from .utils import load_jsonld
-from .config import pit_filepath
-
-PROVIT_NS = "http://provit.diggr.link/"
-PROV = Namespace("http://www.w3.org/ns/prov#")
+from .config import CONFIG as CF
 
 
-def load_prov(filepath, namespace=PROVIT_NS):
+def load_prov(filepath, namespace=PROVIT):
     """
     Loads a Provenance Object from the given file path or returns None if no (valid) provenance file was found.
     :param filepath:
@@ -46,6 +44,21 @@ def load_prov(filepath, namespace=PROVIT_NS):
     else:
         return None
 
+
+def load_prov_files(directory):
+    files = []
+    for filename in os.listdir(directory):
+        filepath = os.path.join(directory, filename)
+        if not filename.endswith(".prov") and not os.path.isdir(filepath):
+            
+            prov = None
+            prov_file = "{}.prov".format(filepath)
+            if os.path.exists(prov_file):
+                print(prov_file)
+                prov_data = Provenance(filepath)
+                files.append(prov_data)
+            
+    return files
 
 class Provenance(object):
     """
@@ -61,7 +74,7 @@ class Provenance(object):
         self.file_name = os.path.basename(filepath)
 
         self.prov_filepath = "{}.prov".format(filepath)
-        self.location = pit_filepath(filepath)
+        self.location = os.path.abspath(filepath)
         self.timestamp = datetime.now().isoformat()
 
         self.namespace = namespace
@@ -78,9 +91,9 @@ class Provenance(object):
                 self.context = context
                 self.graph = g
                 self.entity = self._get_root_entity()
-                if "provit_ns" not in context:
-                    self.context["provit_ns"] = PROVIT_NS
-                self.namespace = self.context["provit_ns"]
+                if "provit" not in context:
+                    self.context["provit"] = PROVIT
+                self.namespace = self.context["provit"]
             else:
                 self._set_up_context(namespace=namespace)
                 self.init = True
@@ -89,19 +102,6 @@ class Provenance(object):
                 else:
                     self.entity = None
 
-    def _build_location_string(self, filepath):
-        """
-        Builds file location literal. If .pit file exists, config + relative path from .pit file will be returned,
-        If no .pit file exists, absolute path of the file will returned
-        """
-        root_dir, config = load_config(filepath)
-        
-        if not root_dir:
-            return os.path.abspath(filepath)
-
-        rel_path = os.path.relpath(filepath, root_dir)
-        #print(config, rel_path)
-        return "{}:{}".format(config, rel_path)
 
 
     def _set_up_context(self, namespace):
@@ -109,12 +109,12 @@ class Provenance(object):
         Initializes Namespaces and JSON-LD context
         """
         if not namespace:
-            namespace = PROVIT_NS
+            namespace = PROVIT
         self.context = {
             "rdfs": str(RDFS),
             "foaf": str(FOAF),
             "prov": "http://www.w3.org/ns/prov#",
-            "provit_ns": namespace
+            "provit": namespace
         }
         self.namespace = namespace
 
@@ -133,18 +133,20 @@ class Provenance(object):
         """
         Creates provenance agent URI
         """
-        agent = URIRef("{}agent/{}".format(self.namespace, agent))
+        #agent = URIRef("{}agent/{}".format(self.namespace, agent))
+        agent = PROVIT[agent]
+        print(agent)
         # add agent to graph
         self.graph.add((agent, RDF.type, PROV.Agent))
         self.graph.add((self.entity, PROV.wasAttributedTo, agent))
 
-    def _generate_activity_node(self, agent, activity, desc):
+    def _generate_activity_node(self, activity, desc):
         """
         Creates provenance activity URI
         """
-        base_activity = "{}/{}".format(agent, activity)
-        id_ = "{}/{}".format(base_activity, uuid.uuid4().hex)
-        activity_uri = URIRef("{}{}".format(self.namespace, id_))
+        id_ = "{}/{}".format(activity, uuid.uuid4().hex)
+        activity_uri = PROVIT[id_]
+        print(activity_uri)
         self.graph.add((activity_uri, RDF.type, PROV.Activity))
         if type(desc) == str:
             self.graph.add((activity_uri, RDFS.label, Literal(desc)))
@@ -166,7 +168,7 @@ class Provenance(object):
         else:
             return root[0]
 
-    def add(self, agent, activity, description):
+    def add(self, agents, activity, description):
         """
         Add new basic provenance information (agent, activity) to file
         """
@@ -181,8 +183,9 @@ class Provenance(object):
             self.graph.add((self.entity, PROV.wasDerivedFrom, prior_entity))
 
         # add prov information
-        self._generate_agent_node(agent)
-        self._generate_activity_node(agent, activity, description)
+        for agent in agents:
+            self._generate_agent_node(agent)
+        self._generate_activity_node(activity, description)
         self.init = False
 
     def add_sources(self, filepaths, add_prov_to_source=True):
@@ -217,6 +220,9 @@ class Provenance(object):
             self.graph.add((primary_source, RDFS.comment, Literal(comment)))
         if url:
             self.graph.add((primary_source, FOAF.homepage, Literal(url)))
+
+    def add_graph(self, graph):
+        self.graph = self.graph + graph
 
     def save(self):
         """
@@ -287,7 +293,7 @@ class Provenance(object):
             sources.append(source_data)
 
         tree["uri"] = str(root_entity)
-        tree["agent"] = str(agent[0])
+        tree["agent"] = [ str(x) for x in agent ]
         tree["activity"] = str(activity[0])
         tree["ended_at"] = str(ended_at)
         tree["activity_desc"] = str(desc[0])
@@ -302,6 +308,65 @@ class Provenance(object):
         """
         tree = self._build_tree(self.entity)
         return tree
+
+    def _get_agent_data(self, agent_uri):
+        slug = agent_uri.split("/")[-1]
+        names = [ str(o) for s, p, o in self.graph.triples( (agent_uri, FOAF.name, None) ) ]
+        homepage = [ str(o) for s, p, o in self.graph.triples( (agent_uri, FOAF.homepage, None) ) ]
+
+        types = [ str(o).split("/")[-1] for s, p, o in self.graph.triples( (agent_uri, RDF.type, None ) ) ]
+        if CF.PERSON in types:
+            email = [ str(o) for s, p, o in self.graph.triples( (agent_uri, PROVIT.email, None) ) ]
+            institution = [ str(o) for s, p, o in self.graph.triples( (agent_uri, PROVIT.institution, None) ) ]
+            return {
+                "slug": slug,
+                "uri": str(agent_uri),
+                "type": CF.PERSON,
+                "name": names,
+                "homepage": homepage,
+                "email": email,
+                "institution": institution
+            }
+        elif CF.ORGANIZATION in types:
+            return {
+                "slug": slug,
+                "uri": str(agent_uri),
+                "type": CF.ORGANIZATION,
+                "name": names,
+                "homepage": homepage
+            }
+        elif CF.SOFTWARE in types:
+            version = [ str(o) for s, p, o in self.graph.triples( (agent_uri, PROVIT.softwareVersion, None) ) ]
+            return {
+                "slug": slug,
+                "uri": str(agent_uri),
+                "type": CF.SOFTWARE,
+                "name": names,
+                "homepage": homepage,
+                "version": version
+            }
+        print(types, agent_uri)
+        return None
+        
+
+    def get_agents(self, include_primary_sources=False):
+        """
+        Returns agent profiles from prov graph
+        """
+
+        agents = []
+
+        agent_uris = [ s for s, p, o in self.graph.triples( (None, RDF.type, PROV.Agent ) ) ]
+
+        if include_primary_sources:
+            primary_source_uris = [ s for s, p, o in self.graph.triples( (None, RDF.type, PROV.PrimarySource ) ) ]
+            agent_uris = list(set(agent_uris).union(set(primary_source_uris)))
+
+        for agent_uri in agent_uris:
+            agent_data = self._get_agent_data(agent_uri)
+            agents.append(agent_data)
+
+        return { x["slug"]:x for x in agents if x }
 
     def get_primary_sources(self):
         """

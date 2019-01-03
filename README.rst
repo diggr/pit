@@ -4,14 +4,35 @@ P(ROV)IT - PROVenance integration tools
 |Python 3.6| |GitHub license| |GitHub issues| |Docs passing|
 
 PROVIT is a light, dezentralized provenance tracking framework. It allows
-the user to track workflows and modifications of data and files. A
-small subset of the `W3C <https://www.w3.org/>`__ `PROV-O
-vocabulary <https://www.w3.org/TR/prov-o/>`__ is implemented. Its aim is to
-provided an easy to use interface for users who have never worked with provenance
+the user to track workflows and modifications of data and files. 
+
+ROVIT works completely decentralized, all information is stored in .prov
+files (as JSON-LD RDF graphs) along it's corresponding data file in the file system.
+No central database or server setup is needed.  
+
+Asmall subset of the `W3C <https://www.w3.org/>`__ `PROV-O
+vocabulary <https://www.w3.org/TR/prov-o/>`__ is implemented. 
+
+Its aim is to provided an easy to use interface for users who have never worked with provenance
 tracking before. It you feel limited by PROVIT you should have a look at
 the more extensive implementation `prov <https://github.com/trungdong/prov/>`__.
 
 Full documentation is available under: `provit.readthedocs.io <https://provit.readthedocs.io/en/latest/>`__.
+
+
+Provit version 1.0 roadmap:
+
+* Delete last provenance event?
+* Add provenance event in frontend
+* Display if directory does not exist
+* Show complete network (incl. Agents and Primary Sources)?
+* Finalize data model
+* Edit agents in frontend
+* Costum namespace in config
+* Check directory on input
+* Consistent, propper, design
+*
+
 
 Requirements
 ------------
