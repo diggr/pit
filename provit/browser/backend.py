@@ -48,6 +48,38 @@ def delete_directories():
     })
 
 
+# FILEBROWSER ENDPOINT 
+@app.route('/filebrowser', methods=['POST'])
+def file_browser():
+    directory = request.json['directory']
+    with_files = request.json['withFiles']
+    with_hidden = request.json['withHidden']
+
+
+    files = []
+    dirs = []
+
+    for filename in os.listdir(directory):
+        filepath = os.path.join(directory, filename)
+        if not filename.endswith('.prov') and not os.path.isdir(filepath) and with_files:
+            if not with_hidden and not filename.startswith('.'):
+                files.append({
+                    'filename': filename,
+                    'filepath': filepath,
+                })
+        if os.path.isdir(filepath):
+            if not with_hidden and not filename.startswith('.'):
+                dirs.append({
+                    'dirname': filename,
+                    'dirpath': filepath 
+                    })
+
+    return jsonify({
+        'files': sorted(files, key=lambda x: x['filename']),
+        'dirs': sorted(dirs, key=lambda x: x['dirname'])
+    })
+
+
 # DIRECTORY (FILE LIST)
 
 @app.route('/directory', methods=['POST'])
