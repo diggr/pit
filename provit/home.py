@@ -41,15 +41,27 @@ def load_directories():
     data = yaml.load(stream)
     print(data, CONFIG.DIRECTORIES_FILE)
 
-    if not isinstance(data, list):
+    if not isinstance(data, dict):
         raise IOError("directories.yaml does not contain a list")
 
     for directory in data:
         if not os.path.exists(directory):
-            raise IOError("directory {} does not exits".format(directory))
+            data[directory]["exists"] = False
+        else:
+            data[directory]["exists"] = True
 
-    return data
+    rv = []
+    for directory, content in data.items():
+        rv.append({
+            "directory": directory,
+            "comment": content["comment"],
+            "exists": content["exists"]
+        })
 
+    print(rv)
+
+    return rv     
+    
 def remove_directories(directory):
     dirs = load_directories()
     dirs.remove(directory)
