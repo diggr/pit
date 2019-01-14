@@ -159,7 +159,7 @@ def get_prov_data():
 def add_prov_data():
     filepath = request.json["filepath"] 
     prov_data = request.json["prov"]
-    prov = load_prov(filepath)
+    prov = Provenance(filepath)
 
     activity = prov_data["activitySlug"]
     agents = [ x for x in prov_data["agents"] if x ]
