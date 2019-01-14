@@ -4,6 +4,8 @@ import time
 import webbrowser
 import logging
 
+from pathlib import Path
+
 from ..config import CONFIG as CF
 from ..home import load_directories, remove_directories, add_directory
 from ..agent import load_agent_profiles
@@ -24,7 +26,7 @@ PROVIS_PORT = 5555
 
 
 
-# DIRECTORIES (DIRECTORY LIST) 
+# HOME VIEW (DIRECTORY LIST) 
 
 @app.route('/directories', methods=['GET', 'POST'])
 def directories():
@@ -55,7 +57,12 @@ def file_browser():
     with_files = request.json['withFiles']
     with_hidden = request.json['withHidden']
 
+    if directory == "" or not os.path.exists(directory):
+        directory = str(Path.home())
+        print("dir")
+        print(directory)
 
+    print(with_files)
     files = []
     dirs = []
 
@@ -134,17 +141,42 @@ def agent_list():
 
 
 
-# FILE ENDPOINT
+# FILE VIEW ENDPOINT
 
 @app.route("/file", methods=['POST'])
 def get_prov_data():
     filepath = request.json["filepath"] 
     prov = load_prov(filepath)
 
-    network = {
-        "nodes": [],
-        "edges": []
-    }
+    if not prov:
+        return jsonify({})
+    return jsonify( {
+        "prov": prov.tree(),
+        "agents": prov.get_agents()
+    } )
+
+@app.route("/file/add", methods=['POST'])
+def add_prov_data():
+    filepath = request.json["filepath"] 
+    prov_data = request.json["prov"]
+    prov = load_prov(filepath)
+
+    activity = prov_data["activitySlug"]
+    agents = [ x for x in prov_data["agents"] if x ]
+    desc = prov_data["comment"]
+    sources = [ x for x in prov_data["sources"] if x ]
+    primary_sources = [ x for x in prov_data["primarySources"] if x ]
+
+    prov.add(
+        agents=agents,
+        description=desc,
+        activity=activity
+    )
+    prov.add_sources(sources)
+    for primary_source in primary_sources:
+        prov.add_primary_source(primary_source)
+
+    prov.save()
 
     if not prov:
         return jsonify({})

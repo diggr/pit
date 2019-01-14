@@ -64,20 +64,31 @@ def load_directories():
     
 def remove_directories(directory):
     dirs = load_directories()
-    dirs.remove(directory)
-
-    #save dirs
-
+    print(directory)
+    # for d in dirs:
+    #     if directory["directory"] == d["directory"]:
+    #         print("remove directory")
+    #         dirs.remove()
+    dirs = [ d for d in dirs if d["directory"] !=  directory["directory"]]
+    print(dirs)
+    save_directories(dirs)
     return dirs
 
 def add_directory(directory):
     dirs = load_directories()
+    
+    # if directory already in current list do not add and return current list
+    for d in dirs:
+        if d["directory"] == directory["directory"]:
+            return dirs
+
     dirs.append(directory)
-
-    #save dirs
-
+    save_directories(dirs)
     return dirs
 
+def save_directories(directories):
+    data = { x["directory"]: { "comment": x["comment"].strip() } for x in directories }
+    yaml.dump(data, open(CONFIG.DIRECTORIES_FILE, "w"), default_flow_style=False)
 
 def load_agents():
     pass
