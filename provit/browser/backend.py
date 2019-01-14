@@ -8,7 +8,7 @@ from pathlib import Path
 
 from ..config import CONFIG as CF
 from ..home import load_directories, remove_directories, add_directory
-from ..agent import load_agent_profiles
+from ..agent import load_agent_profiles, load_agent_profile
 from ..prov import Provenance, load_prov
 
 from flask_cors import CORS, cross_origin
@@ -172,9 +172,24 @@ def add_prov_data():
         description=desc,
         activity=activity
     )
+
+    for agent in agents:
+        agent_profile = load_agent_profile(agent)
+        if agent_profile:
+            prov.add_graph(agent_profile.graph())
+            prov.save()        
+
     prov.add_sources(sources)
+    prov.save() 
+    
     for primary_source in primary_sources:
         prov.add_primary_source(primary_source)
+
+        agent_profile = load_agent_profile(primary_source)
+        if agent_profile:
+            prov.add_graph(agent_profile.graph())
+            prov.save()
+
 
     prov.save()
 
