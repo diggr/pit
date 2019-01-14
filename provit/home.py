@@ -41,6 +41,9 @@ def load_directories():
     data = yaml.load(stream)
     print(data, CONFIG.DIRECTORIES_FILE)
 
+    if not data:
+        data = {}
+
     if not isinstance(data, dict):
         raise IOError("directories.yaml does not contain a list")
 
