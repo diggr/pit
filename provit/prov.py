@@ -153,6 +153,7 @@ class Provenance(object):
         self.graph.add((activity_uri, PROV.endedAtTime, Literal(datetime.now().isoformat(), datatype="xsd:dateTime")))
         self.graph.add((self.entity, PROV.wasGeneratedBy, activity_uri))
 
+
     def _get_root_entity(self):
         """
         Return the 'root' entity of the prov graph
@@ -167,6 +168,44 @@ class Provenance(object):
             # print("invalid provenance data")
         else:
             return root[0]
+
+    def iter_remove(self, root_uri):
+
+        #self.graph.add( (root_uri, PROVIT.status, PROVIT.removed) )
+        source_uris = [ o for s, p, o in self.graph.triples( (root_uri, PROV.wasDerivedFrom, None) ) ]
+        for source_uri in source_uris:
+            self.iter_remove(source_uri)
+
+        self.graph.remove( (root_uri, None, None) )
+
+
+    def remove_last_event(self):
+        """
+        removes the last provenance event and all sources, if they do not belong to the same file
+        """
+        location = str(self.graph.value(self.entity, PROV.atLocation))
+
+        #self.graph.add( (self.entity, PROVIT.status, PROVIT.removed) )
+        source_uris = [ o for s, p, o in self.graph.triples( (self.entity, PROV.wasDerivedFrom, None) ) ]
+
+        new_root_entity = None
+
+        for source_uri in source_uris:
+            source_location = str(self.graph.value(source_uri, PROV.atLocation))
+            
+            print(location, source_location)
+
+            if location != source_location:
+                self.iter_remove(source_uri)
+            else:
+                new_root_entity = source_uri
+
+        self.graph.remove( (self.entity, None, None) )
+        print(new_root_entity)
+        self.entity = new_root_entity
+        if not new_root_entity:
+            self.graph = Graph()
+
 
     def add(self, agents, activity, description):
         """
@@ -246,11 +285,19 @@ class Provenance(object):
 
         # get provenance information
         location = [o for s, p, o in self.graph.triples((root_entity, PROV.atLocation, None))]
+        print(root_entity, location)
 
         # agent
         agent = [o for s, p, o in self.graph.triples((root_entity, PROV.wasAttributedTo, None))]
         if len(agent) == 0:
             agent = [""]
+
+        # status
+        status_rv = [o for s, p, o in self.graph.triples((root_entity, PROVIT.status, None))]
+        if len(status_rv) == 0:
+            status = 'active'            
+        else:
+            status = 'removed'
 
         # activity
         activity = [o for s, p, o in self.graph.triples((root_entity, PROV.wasGeneratedBy, None))]
@@ -293,6 +340,7 @@ class Provenance(object):
             sources.append(source_data)
 
         tree["uri"] = str(root_entity)
+        tree["status"] = str(status)
         tree["agent"] = [ str(x) for x in agent ]
         tree["activity"] = str(activity[0])
         tree["ended_at"] = str(ended_at)
@@ -306,7 +354,10 @@ class Provenance(object):
         """
         Returns of dict tree with provenance information
         """
-        tree = self._build_tree(self.entity)
+        if self.entity:
+            tree = self._build_tree(self.entity)
+        else:
+            tree = {}
         return tree
 
     def _get_agent_data(self, agent_uri):

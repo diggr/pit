@@ -27,7 +27,6 @@ PROVIS_PORT = 5555
 
 
 # HOME VIEW (DIRECTORY LIST) 
-
 @app.route('/directories', methods=['GET', 'POST'])
 def directories():
     if request.method == 'GET':
@@ -88,7 +87,6 @@ def file_browser():
 
 
 # DIRECTORY (FILE LIST)
-
 @app.route('/directory', methods=['POST'])
 def file_list():
     directory = request.json["directory"]
@@ -126,7 +124,6 @@ def file_list():
 
 
 # AGENTS LIST
-
 @app.route("/agents")
 def agent_list():
     agents = load_agent_profiles()
@@ -142,15 +139,37 @@ def agent_list():
 
 
 # FILE VIEW ENDPOINT
-
 @app.route("/file", methods=['POST'])
 def get_prov_data():
     filepath = request.json["filepath"] 
     prov = load_prov(filepath)
 
     if not prov:
-        return jsonify({})
+        return jsonify({ "hasProv": False })
     return jsonify( {
+        "hasProv": True,
+        "root_event": prov.entity,
+        "prov": prov.tree(),
+        "agents": prov.get_agents()
+    } )
+
+@app.route("/file/remove", methods=["POST"])
+def remove_prov_data():
+    filepath = request.json["filepath"]
+    prov = Provenance(filepath)
+    prov.remove_last_event()
+    prov.save()
+
+    if not prov.entity:
+        os.remove("{}.prov".format(filepath))
+
+    prov = load_prov(filepath)
+
+    if not prov:
+        return jsonify({ "hasProv": False })
+    return jsonify( {
+        "hasProv": True,
+        "root_event": prov.entity,
         "prov": prov.tree(),
         "agents": prov.get_agents()
     } )
@@ -196,6 +215,8 @@ def add_prov_data():
     if not prov:
         return jsonify({})
     return jsonify( {
+        "hasProv": True,
+        "root_event": prov.entity,
         "prov": prov.tree(),
         "agents": prov.get_agents()
     } )
