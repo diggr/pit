@@ -239,6 +239,14 @@ def config_update():
     pass
 
 
+
+
+#Provit browser route
+@app.route('/')
+def index():
+    return render_template("index.html")
+
+
 def start_browser(debug=True):
     n = os.fork()
     if n > 0:
