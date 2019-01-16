@@ -65,28 +65,33 @@ Usage
 Provenance Integration Tools provide a command line client which can be
 used *out of the box* to enrich any file based data with provenance
 information. Furthermore the provenance class and vocabulary shipped
-with *PIT* can be used within other applications.
+with *provit* can be used within other applications.
 
 Command Line Client
 ~~~~~~~~~~~~~~~~~~~
 
 Usage:
 
+Open provit Browser:
+
 .. code:: zsh
 
-    $ pit [OPTIONS] FILEPATH
+    $ provit browser
+
+Add provenace event to a file:
+
+.. code:: zsh
+
+    $ pit add FILEPATH [OPTIONS]
 
 Options:
 
---add    Add provenance information layer to file
 -a AGENT, --agent AGENT    Provenance information: agent
 --activity ACTIVITY        Provenance information: activity
 -d DESCRIPTION, --desc DESCRIPTION     Provenance information: Description
                             of the data manipulation process
 -o ORIGIN, --origin ORIGIN    Provenance information: Data origin
 -s SOURCES, --sources SOURCES    Provenance information: Source files
--b, --browser     Provenance browser
--n NAMESPACE, --namespace NAMESPACE    Provenance Namespace, default: http://provit.diggr.link/
 --help      Show this message and exit.
 
 Provenance Class
@@ -94,15 +99,15 @@ Provenance Class
 
 .. code:: python
 
-    from pit.prov import Provenance
+    from provit import Provenance
 
     # load prov data for a file, or create new prov for file
     prov = Provenance(<filepath>)
 
     # add provenance metadata
-    prov.add(agent="agent", activity="activity", description="...")
-    prov.add_primary_source("primary_source", url="http://...", comment="...")
-    prov.add_sources(["filepath1", "filepath2"])
+    prov.add(agents=[ "agent" ], activity="activity", description="...")
+    prov.add_primary_source("primary_source")
+    prov.add_sources([ "filepath1", "filepath2" ])
 
     # return provenance as json tree
     prov_dict = prov.tree()
@@ -148,12 +153,7 @@ FAQ / Paradigms
 Can I add multiple agents to an activity?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-No. The reason is: If you can distinguish the activities or impact of
-the agent, then you have multiple agents with *multiple activities*.
-E.g. if you let three students help you proofreading a file and you get
-back *1* revised version, then the three students are *1 agent* as you
-cannot distinguish between their results. If you get back *3 versions*
-you have *3 agents* and *3 activities*.
+Yes.
 
 Overview
 --------
