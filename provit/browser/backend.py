@@ -86,40 +86,46 @@ def file_browser():
     })
 
 
+
+
 # DIRECTORY (FILE LIST)
-@app.route('/directory', methods=['POST'])
+@app.route('/directory', methods=['GET','POST'])
 def file_list():
-    directory = request.json["directory"]
-    files = []
-    for filename in os.listdir(directory):
-        filepath = os.path.join(directory, filename)
-        if not filename.endswith(".prov") and not os.path.isdir(filepath):
-            
-            prov = None
-            prov_file = "{}.prov".format(filepath)
-            if os.path.exists(prov_file):
-                print(prov_file)
-                prov_data = Provenance(filepath)
-                prov_tree = prov_data.tree()
-                print(prov_tree)
-                print(prov_data.get_primary_sources())
-                prov = {
-                    "last_activity": prov_tree["activity_desc"],
-                    "last_agent": prov_tree["agent"],
-                    "timestamp": prov_tree["ended_at"]
-                }
+    if request.method=='GET':
+        print("yada")
+        return render_template("index.html")
+    else:
+        directory = request.json["directory"]
+        files = []
+        for filename in os.listdir(directory):
+            filepath = os.path.join(directory, filename)
+            if not filename.endswith(".prov") and not os.path.isdir(filepath):
+                
+                prov = None
+                prov_file = "{}.prov".format(filepath)
+                if os.path.exists(prov_file):
+                    print(prov_file)
+                    prov_data = Provenance(filepath)
+                    prov_tree = prov_data.tree()
+                    print(prov_tree)
+                    print(prov_data.get_primary_sources())
+                    prov = {
+                        "last_activity": prov_tree["activity_desc"],
+                        "last_agent": prov_tree["agent"],
+                        "timestamp": prov_tree["ended_at"]
+                    }
 
-            files.append({
-                "filename": filename,
-                "filepath": filepath,
-                "prov": prov
-            })
+                files.append({
+                    "filename": filename,
+                    "filepath": filepath,
+                    "prov": prov
+                })
 
-    files = sorted(files, key=lambda x: x["filename"].lower())
+        files = sorted(files, key=lambda x: x["filename"].lower())
 
-    return jsonify({
-        "files": files
-    })
+        return jsonify({
+            "files": files
+        })
 
 
 
@@ -243,8 +249,14 @@ def config_update():
 
 #Provit browser route
 @app.route('/')
+@app.route('/directory/')
+@app.route('/agents/')
+@app.route('/file/')
+@app.route('/config/')
 def index():
     return render_template("index.html")
+
+
 
 
 def start_browser(debug=False):
