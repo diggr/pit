@@ -34,12 +34,12 @@ def browser(directory):
 
 @cli.command()
 @click.argument("filepath")
-@click.option("--agents", "-a", multiple=True, default="", help="Provenance information: agent")
+@click.option("--agent", "-a", multiple=True, default="", help="Provenance information: agent")
 @click.option("--activity", default="", help="Provenane information: activity")
 @click.option("--comment", "-c", default="", help="Provenance information: Description of the data manipulation process")
 @click.option("--origin", "-o", default="", help="Provenance information: Data origin")
 @click.option("--sources", "-s", multiple=True, default="", help="Provenance information: Source files")
-def add(filepath, agents, activity, comment, sources, origin):
+def add(filepath, agent, activity, comment, sources, origin):
     if not os.path.exists(filepath):
         print("Invalid filepath")
         sys.exit(1)
@@ -49,8 +49,8 @@ def add(filepath, agents, activity, comment, sources, origin):
         prov.add(agents=agents, activity=activity, description=comment)
         prov.save()
 
-        for agent in agents: 
-            agent_profile = load_agent_profile(agent)
+        for a in agent: 
+            agent_profile = load_agent_profile(a)
             if agent_profile:
                 prov.add_graph(agent_profile.graph())
                 prov.save()

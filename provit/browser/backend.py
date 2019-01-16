@@ -247,7 +247,7 @@ def index():
     return render_template("index.html")
 
 
-def start_browser(debug=True):
+def start_browser(debug=False):
     n = os.fork()
     if n > 0:
         try:
