@@ -20,20 +20,6 @@ the more extensive implementation `prov <https://github.com/trungdong/prov/>`__.
 Full documentation is available under: `provit.readthedocs.io <https://provit.readthedocs.io/en/latest/>`__.
 
 
-Provit version 1.0 roadmap:
-
-* Delete last provenance event?
-* Add provenance event in frontend
-* Display if directory does not exist
-* Show complete network (incl. Agents and Primary Sources)?
-* Finalize data model
-* Edit agents in frontend
-* Costum namespace in config
-* Check directory on input
-* Consistent, propper, design
-*
-
-
 Requirements
 ------------
 
