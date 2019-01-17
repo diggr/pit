@@ -140,17 +140,21 @@ class Provenance(object):
         self.graph.add((agent, RDF.type, PROV.Agent))
         self.graph.add((self.entity, PROV.wasAttributedTo, agent))
 
-    def _generate_activity_node(self, activity, desc):
+    def _generate_activity_node(self, activity, desc, ended_at=""):
         """
         Creates provenance activity URI
         """
         id_ = "{}/{}".format(activity, uuid.uuid4().hex)
         activity_uri = PROVIT[id_]
         print(activity_uri)
+
+        if not ended_at:
+            ended_at = datetime.now().isoformat()
+
         self.graph.add((activity_uri, RDF.type, PROV.Activity))
         if type(desc) == str:
             self.graph.add((activity_uri, RDFS.label, Literal(desc)))
-        self.graph.add((activity_uri, PROV.endedAtTime, Literal(datetime.now().isoformat(), datatype="xsd:dateTime")))
+        self.graph.add((activity_uri, PROV.endedAtTime, Literal(ended_at, datatype="xsd:dateTime")))
         self.graph.add((self.entity, PROV.wasGeneratedBy, activity_uri))
 
 
@@ -207,7 +211,7 @@ class Provenance(object):
             self.graph = Graph()
 
 
-    def add(self, agents, activity, description):
+    def add(self, agents, activity, description, ended_at=""):
         """
         Add new basic provenance information (agent, activity) to file
         """
@@ -224,7 +228,7 @@ class Provenance(object):
         # add prov information
         for agent in agents:
             self._generate_agent_node(agent)
-        self._generate_activity_node(activity, description)
+        self._generate_activity_node(activity, description, ended_at)
         self.init = False
 
     def add_sources(self, filepaths, add_prov_to_source=True):

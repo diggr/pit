@@ -218,11 +218,13 @@ def add_prov_data():
     desc = prov_data["comment"]
     sources = [ x for x in prov_data["sources"] if x ]
     primary_sources = [ x for x in prov_data["primarySources"] if x ]
+    ended_at = prov_data["timestamp"]
 
     prov.add(
         agents=agents,
         description=desc,
-        activity=activity
+        activity=activity,
+        ended_at=ended_at
     )
 
     for agent in agents:
