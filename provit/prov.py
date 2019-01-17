@@ -140,7 +140,7 @@ class Provenance(object):
         self.graph.add((agent, RDF.type, PROV.Agent))
         self.graph.add((self.entity, PROV.wasAttributedTo, agent))
 
-    def _generate_activity_node(self, activity, desc, ended_at=""):
+    def _generate_activity_node(self, activity, desc, ended_at="", started_at=""):
         """
         Creates provenance activity URI
         """
@@ -154,6 +154,12 @@ class Provenance(object):
         self.graph.add((activity_uri, RDF.type, PROV.Activity))
         if type(desc) == str:
             self.graph.add((activity_uri, RDFS.label, Literal(desc)))
+        
+        if started_at:
+            print("add start time to graph")
+            self.graph.add((activity_uri, PROV.startedAtTime, Literal(started_at, datatype="xsd:dateTime")))
+
+
         self.graph.add((activity_uri, PROV.endedAtTime, Literal(ended_at, datatype="xsd:dateTime")))
         self.graph.add((self.entity, PROV.wasGeneratedBy, activity_uri))
 
@@ -211,7 +217,7 @@ class Provenance(object):
             self.graph = Graph()
 
 
-    def add(self, agents, activity, description, ended_at=""):
+    def add(self, agents, activity, description, started_at="", ended_at=""):
         """
         Add new basic provenance information (agent, activity) to file
         """
@@ -228,7 +234,7 @@ class Provenance(object):
         # add prov information
         for agent in agents:
             self._generate_agent_node(agent)
-        self._generate_activity_node(activity, description, ended_at)
+        self._generate_activity_node(activity, description, ended_at, started_at)
         self.init = False
 
     def add_sources(self, filepaths, add_prov_to_source=True):
@@ -308,6 +314,14 @@ class Provenance(object):
         if len(activity) > 0:
             ended_at = [o for s, p, o in self.graph.triples((activity[0], PROV.endedAtTime, None))]
             ended_at = str(ended_at[0])[:19].replace("T", " ")
+
+            started_at = [o for s, p, o in self.graph.triples((activity[0], PROV.startedAtTime, None))]
+            if len(started_at) > 0:
+                started_at = str(started_at[0])[:19].replace("T", " ")
+            else:
+                started_at = None
+            print(started_at," + ", ended_at)
+
             desc = [o for s, p, o in self.graph.triples((activity[0], RDFS.label, None))]
         else:
             activity = [""]
@@ -347,6 +361,10 @@ class Provenance(object):
         tree["status"] = str(status)
         tree["agent"] = [ str(x) for x in agent ]
         tree["activity"] = str(activity[0])
+
+        if started_at:
+            tree["started_at"] = str (started_at)
+
         tree["ended_at"] = str(ended_at)
         tree["activity_desc"] = str(desc[0])
         tree["location"] = str(location[0])

@@ -211,6 +211,8 @@ def remove_prov_data():
 def add_prov_data():
     filepath = request.json["filepath"] 
     prov_data = request.json["prov"]
+    is_timestamp = request.json["isTimestamp"]
+    print("timestamp: ", is_timestamp)
     prov = Provenance(filepath)
 
     activity = prov_data["activitySlug"]
@@ -218,12 +220,19 @@ def add_prov_data():
     desc = prov_data["comment"]
     sources = [ x for x in prov_data["sources"] if x ]
     primary_sources = [ x for x in prov_data["primarySources"] if x ]
-    ended_at = prov_data["timestamp"]
+    if is_timestamp:
+        started_at = ""
+        ended_at = prov_data["startedAt"]
+    else:
+        started_at = prov_data["startedAt"]
+        ended_at = prov_data["endedAt"]
+        print(started_at, ended_at)
 
     prov.add(
         agents=agents,
         description=desc,
         activity=activity,
+        started_at=started_at,
         ended_at=ended_at
     )
 
