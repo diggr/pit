@@ -323,54 +323,54 @@ class Provenance(object):
             print(started_at," + ", ended_at)
 
             desc = [o for s, p, o in self.graph.triples((activity[0], RDFS.label, None))]
-        else:
-            activity = [""]
-            ended_at = ""
-            started_at = None
-            desc = [""]
+        # else:
+        #     activity = [""]
+        #     ended_at = ""
+        #     started_at = None
+        #     desc = [""]
 
         # primary sources
-        primary_sources = []
-        for s, p, o in self.graph.triples((root_entity, PROV.hadPrimarySource, None)):
-            uri = str(o)
-            slug = uri.split("/")[-1]
-            url = [o2 for s2, p2, o2 in self.graph.triples((o, FOAF.homepage, None))]
-            if len(url) > 0:
-                url = str(url[0])
-            else:
-                url = ""
-            comment = [o2 for s2, p2, o2 in self.graph.triples((o, RDFS.comment, None))]
-            if len(comment) > 0:
-                comment = str(comment[0])
-            else:
-                comment = ""
+            primary_sources = []
+            for s, p, o in self.graph.triples((root_entity, PROV.hadPrimarySource, None)):
+                uri = str(o)
+                slug = uri.split("/")[-1]
+                url = [o2 for s2, p2, o2 in self.graph.triples((o, FOAF.homepage, None))]
+                if len(url) > 0:
+                    url = str(url[0])
+                else:
+                    url = ""
+                comment = [o2 for s2, p2, o2 in self.graph.triples((o, RDFS.comment, None))]
+                if len(comment) > 0:
+                    comment = str(comment[0])
+                else:
+                    comment = ""
 
-            primary_sources.append({
-                "uri": uri,
-                "url": url,
-                "slug": slug,
-                "comment": comment
-            })
+                primary_sources.append({
+                    "uri": uri,
+                    "url": url,
+                    "slug": slug,
+                    "comment": comment
+                })
 
-        # get sources data
-        sources = []
-        for source_uri in source_uris:
-            source_data = self._build_tree(source_uri)
-            sources.append(source_data)
+            # get sources data
+            sources = []
+            for source_uri in source_uris:
+                source_data = self._build_tree(source_uri)
+                sources.append(source_data)
 
-        tree["uri"] = str(root_entity)
-        tree["status"] = str(status)
-        tree["agent"] = [ str(x) for x in agent ]
-        tree["activity"] = str(activity[0])
+            tree["uri"] = str(root_entity)
+            tree["status"] = str(status)
+            tree["agent"] = [ str(x) for x in agent ]
+            tree["activity"] = str(activity[0])
 
-        if started_at:
-            tree["started_at"] = str (started_at)
+            if started_at:
+                tree["started_at"] = str (started_at)
 
-        tree["ended_at"] = str(ended_at)
-        tree["activity_desc"] = str(desc[0])
-        tree["location"] = str(location[0])
-        tree["primary_sources"] = primary_sources
-        tree["sources"] = sources
+            tree["ended_at"] = str(ended_at)
+            tree["activity_desc"] = str(desc[0])
+            tree["location"] = str(location[0])
+            tree["primary_sources"] = primary_sources
+            tree["sources"] = sources
         return tree
 
     def tree(self):
