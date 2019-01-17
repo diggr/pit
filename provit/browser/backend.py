@@ -88,46 +88,73 @@ def file_browser():
 
 
 
-# DIRECTORY (FILE LIST)
-@app.route('/directory', methods=['GET','POST'])
+# DIRECTORY VIEW (FILE LIST)
+
+def files_with_prov(directory):
+    for filename in os.listdir(directory):
+        filepath = os.path.join(directory, filename)
+        if not filename.endswith(".prov") and not os.path.isdir(filepath):
+            yield {
+                "name": filename,
+                "path": filepath
+            }
+
+def build_file_list(directory):
+    files = []
+    for filename in os.listdir(directory):
+        filepath = os.path.join(directory, filename)
+        if not filename.endswith(".prov") and not os.path.isdir(filepath):
+            
+            prov = None
+            prov_file = "{}.prov".format(filepath)
+            if os.path.exists(prov_file):
+                print(prov_file)
+                prov_data = Provenance(filepath)
+                prov_tree = prov_data.tree()
+                print(prov_tree)
+                print(prov_data.get_primary_sources())
+                prov = {
+                    "last_activity": prov_tree["activity_desc"],
+                    "last_agent": prov_tree["agent"],
+                    "timestamp": prov_tree["ended_at"],
+                    "last_location": prov_tree["location"]
+                }
+
+            files.append({
+                "filename": filename,
+                "filepath": filepath,
+                "prov": prov
+            })
+
+    files = sorted(files, key=lambda x: x["filename"].lower())
+    return files
+
+
+
+@app.route('/directory', methods=['POST'])
 def file_list():
-    if request.method=='GET':
-        print("yada")
-        return render_template("index.html")
-    else:
-        directory = request.json["directory"]
-        files = []
-        for filename in os.listdir(directory):
-            filepath = os.path.join(directory, filename)
-            if not filename.endswith(".prov") and not os.path.isdir(filepath):
-                
-                prov = None
-                prov_file = "{}.prov".format(filepath)
-                if os.path.exists(prov_file):
-                    print(prov_file)
-                    prov_data = Provenance(filepath)
-                    prov_tree = prov_data.tree()
-                    print(prov_tree)
-                    print(prov_data.get_primary_sources())
-                    prov = {
-                        "last_activity": prov_tree["activity_desc"],
-                        "last_agent": prov_tree["agent"],
-                        "timestamp": prov_tree["ended_at"]
-                    }
+    directory = request.json["directory"]
 
-                files.append({
-                    "filename": filename,
-                    "filepath": filepath,
-                    "prov": prov
-                })
+    files = build_file_list(directory)
 
-        files = sorted(files, key=lambda x: x["filename"].lower())
+    return jsonify({
+        "files": files
+    })
 
-        return jsonify({
-            "files": files
-        })
+@app.route('/directory/update', methods=['POST'])
+def update_file_list():
+    directory = request.json["directory"]
 
+    for f in files_with_prov(directory):
+        prov = Provenance(f["path"])
+        if prov.tree()["location"] != f["path"]:
+            prov.add(agents=[], activity="move_file", description="file moved to new location -> {}".format(directory))
+            prov.save()
 
+    files = build_file_list(directory)
+    return jsonify({
+        "files": files
+    })
 
 # AGENTS LIST
 @app.route("/agents")
