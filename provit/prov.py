@@ -292,7 +292,7 @@ class Provenance(object):
         """
         tree = {}
         source_uris = [o for s, p, o in self.graph.triples((root_entity, PROV.wasDerivedFrom, None))]
-
+        started_at = None
         # get provenance information
         location = [o for s, p, o in self.graph.triples((root_entity, PROV.atLocation, None))]
         print(root_entity, location)
@@ -326,6 +326,7 @@ class Provenance(object):
         else:
             activity = [""]
             ended_at = ""
+            started_at = None
             desc = [""]
 
         # primary sources
