@@ -235,6 +235,7 @@ def add_prov_data():
         started_at=started_at,
         ended_at=ended_at
     )
+    prov.save()
 
     for agent in agents:
         agent_profile = load_agent_profile(agent)
