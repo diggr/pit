@@ -270,7 +270,7 @@ def config_update():
     pass
 
 
-#Provit browser route
+#Provit browser routes
 @app.route('/')
 @app.route('/directory/')
 @app.route('/agents/')
@@ -299,4 +299,3 @@ def start_provit_browser(debug=False):
     backend_process = Process(target=start_backend, args=(debug,))
     backend_process.start()
     start_webbrowser()
-p
