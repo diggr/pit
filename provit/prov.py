@@ -27,9 +27,10 @@ from datetime import datetime
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, FOAF, RDFS
 
-from .namespaces import PROV, PROVIT
+from .namespaces import PROV, PROVIT, SCHEMA
 from .utils import load_jsonld
 from .config import CONFIG as CF
+from .agent import load_agent_profile
 
 
 def load_prov(filepath, namespace=PROVIT):
@@ -108,15 +109,14 @@ class Provenance(object):
         """
         Initializes Namespaces and JSON-LD context
         """
-        if not namespace:
-            namespace = PROVIT
         self.context = {
             "rdfs": str(RDFS),
             "foaf": str(FOAF),
-            "prov": "http://www.w3.org/ns/prov#",
-            "provit": namespace
+            "prov": str(PROV),
+            "schema": str(SCHEMA),
+            "provit": str(PROVIT)
         }
-        self.namespace = namespace
+        self.namespace = PROVIT
 
     def _generate_entity_node(self):
         """
@@ -135,7 +135,6 @@ class Provenance(object):
         """
         #agent = URIRef("{}agent/{}".format(self.namespace, agent))
         agent = PROVIT[agent]
-        print(agent)
         # add agent to graph
         self.graph.add((agent, RDF.type, PROV.Agent))
         self.graph.add((self.entity, PROV.wasAttributedTo, agent))
@@ -146,19 +145,17 @@ class Provenance(object):
         """
         id_ = "{}/{}".format(activity, uuid.uuid4().hex)
         activity_uri = PROVIT[id_]
-        print(activity_uri)
-
-        if not ended_at:
-            ended_at = datetime.now().isoformat()
 
         self.graph.add((activity_uri, RDF.type, PROV.Activity))
         if type(desc) == str:
             self.graph.add((activity_uri, RDFS.label, Literal(desc)))
+
+        if not ended_at:
+            ended_at = datetime.now().isoformat()
         
         if started_at:
             print("add start time to graph")
             self.graph.add((activity_uri, PROV.startedAtTime, Literal(started_at, datatype="xsd:dateTime")))
-
 
         self.graph.add((activity_uri, PROV.endedAtTime, Literal(ended_at, datatype="xsd:dateTime")))
         self.graph.add((self.entity, PROV.wasGeneratedBy, activity_uri))
@@ -173,11 +170,12 @@ class Provenance(object):
         # get all entity nodes, which are sources
         derived = [o for s, p, o in self.graph.triples((None, PROV.wasDerivedFrom, None))]
         root = list(set(entities) - set(derived))
+
         if len(root) != 1:
             raise TypeError("Invalid provenance file: cannot locate root element")
-            # print("invalid provenance data")
         else:
             return root[0]
+
 
     def iter_remove(self, root_uri):
 
@@ -233,9 +231,16 @@ class Provenance(object):
 
         # add prov information
         for agent in agents:
+            print(agent)
             self._generate_agent_node(agent)
+            # add prov information from agent profile, if available
+            agent_profile = load_agent_profile(agent)
+            if agent_profile:
+                self.add_graph(agent_profile.graph())
+
         self._generate_activity_node(activity, description, ended_at, started_at)
         self.init = False
+
 
     def add_sources(self, filepaths, add_prov_to_source=True):
         """
@@ -258,20 +263,24 @@ class Provenance(object):
                 if add_prov_to_source:
                     source_prov.save()
 
+
     def add_primary_source(self, primary_source, url=None, comment=None):
         """
         Adds primary source (+ url and comment) to provenance information
         """
+        slug = primary_source
         primary_source = URIRef("{}{}".format(self.namespace, primary_source))
         self.graph.add((primary_source, RDF.type, PROV.PrimarySource))
         self.graph.add((self.entity, PROV.hadPrimarySource, primary_source))
-        if comment:
-            self.graph.add((primary_source, RDFS.comment, Literal(comment)))
-        if url:
-            self.graph.add((primary_source, FOAF.homepage, Literal(url)))
+        
+        agent_profile = load_agent_profile(slug)
+        if agent_profile:
+            self.add_graph(agent_profile.graph())
+
 
     def add_graph(self, graph):
         self.graph = self.graph + graph
+
 
     def save(self):
         """
@@ -280,11 +289,14 @@ class Provenance(object):
         with open(self.prov_filepath, "wb") as f:
             f.write(self.graph.serialize(format="json-ld", context=self.context))
 
+
     def __str__(self):
         raise NotImplementedError
 
+
     def __repr__(self):
         return "Provenance(\"{}\")".format(self.location)
+
 
     def _build_tree(self, root_entity):
         """
@@ -323,13 +335,7 @@ class Provenance(object):
             print(started_at," + ", ended_at)
 
             desc = [o for s, p, o in self.graph.triples((activity[0], RDFS.label, None))]
-        # else:
-        #     activity = [""]
-        #     ended_at = ""
-        #     started_at = None
-        #     desc = [""]
 
-        # primary sources
             primary_sources = []
             for s, p, o in self.graph.triples((root_entity, PROV.hadPrimarySource, None)):
                 uri = str(o)
@@ -373,6 +379,7 @@ class Provenance(object):
             tree["sources"] = sources
         return tree
 
+
     def tree(self):
         """
         Returns of dict tree with provenance information
@@ -383,14 +390,24 @@ class Provenance(object):
             tree = {}
         return tree
 
+    def _get_uri_slug(self, uri):
+        if "#" in uri:
+            return str(uri).split("#")[-1]
+        else:
+            return str(uri).split("/")[-1]
+
     def _get_agent_data(self, agent_uri):
+
+        
         slug = agent_uri.split("/")[-1]
         names = [ str(o) for s, p, o in self.graph.triples( (agent_uri, FOAF.name, None) ) ]
         homepage = [ str(o) for s, p, o in self.graph.triples( (agent_uri, FOAF.homepage, None) ) ]
 
-        types = [ str(o).split("/")[-1] for s, p, o in self.graph.triples( (agent_uri, RDF.type, None ) ) ]
+        types = [ self._get_uri_slug(o) for s, p, o in self.graph.triples( (agent_uri, RDF.type, None ) ) ]
+        print(types)
+
         if CF.PERSON in types:
-            email = [ str(o) for s, p, o in self.graph.triples( (agent_uri, PROVIT.email, None) ) ]
+            email = [ str(o) for s, p, o in self.graph.triples( (agent_uri, FOAF.mbox, None) ) ]
             institution = [ str(o) for s, p, o in self.graph.triples( (agent_uri, PROVIT.institution, None) ) ]
             return {
                 "slug": slug,
@@ -410,7 +427,7 @@ class Provenance(object):
                 "homepage": homepage
             }
         elif CF.SOFTWARE in types:
-            version = [ str(o) for s, p, o in self.graph.triples( (agent_uri, PROVIT.softwareVersion, None) ) ]
+            version = [ str(o) for s, p, o in self.graph.triples( (agent_uri, SCHEMA.softwareVersion, None) ) ]
             return {
                 "slug": slug,
                 "uri": str(agent_uri),
@@ -442,6 +459,7 @@ class Provenance(object):
 
         return { x["slug"]:x for x in agents if x }
 
+
     def get_primary_sources(self):
         """
         Returns the URIs of all primary sources in prov graph
@@ -449,6 +467,7 @@ class Provenance(object):
         primary_sources = [str(o) for s, p, o in self.graph.triples((None, PROV.hadPrimarySource, None))]
         return list(set(primary_sources))
     
+
     def get_current_location(self):
         """
         Returs the file location of root element

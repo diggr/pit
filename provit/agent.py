@@ -1,21 +1,60 @@
+"""
+Everything agent profile related
+
+
+1. Classes
+
+* Person
+* SoftwareAgent
+* Organization
+
+Each class contains :to_json(): and :graph(): functions,
+returning the data of the classes either as json-dict or
+rdflib Graph.
+
+
+2. Helper functions
+
+* load_agent_profile(slug) 
+  loads the yaml file of agent :slug: and initiates the 
+  respective agent class (depending on type)
+
+* load_agent_profiles() 
+  loads all agent yaml files and returns a list of 
+  agent classes
+
+* agent_factory(slug, type_) 
+  initializes an agent class of type :type_: with id/uri
+  :slug:
+
+"""
+
 import os
 import yaml
 
 from rdflib import Graph, Literal
 from rdflib.namespace import FOAF, URIRef, Namespace, RDF
-from .namespaces import PROVIT, PROV
 
+from .namespaces import PROVIT, PROV, SCHEMA
 from .config import CONFIG as CF
-from .utils import provit_uri
 
 
-def get_element_or_empty(data, element, alt):
+def _get_element_or_alt(data, element, alt):
+    """
+    if :element: is in dict :data: return it, otherwise 
+    return :alt:
+    """
     if element in data:
         return data[element]
     else:
         return alt
 
+
 def load_agent_profile(slug):
+    """
+    loads agent yaml profile (if available) and initiates agent 
+    class with the values obtained from the yaml file
+    """
     filepath = os.path.join(CF.AGENTS_DIR, "{}.yaml".format(slug))
     if not os.path.exists(filepath):
         return None
@@ -23,11 +62,11 @@ def load_agent_profile(slug):
     data = yaml.load(open(filepath, "r"))
     
     if data["type"] == CF.PERSON:
-        uri = get_element_or_empty(data, "uri", "")
-        name = get_element_or_empty(data, "name", [])
-        institution = get_element_or_empty(data, "institution", [])
-        homepage = get_element_or_empty(data, "homepage", [])
-        email = get_element_or_empty(data, "email", []) 
+        uri = _get_element_or_alt(data, "uri", "")
+        name = _get_element_or_alt(data, "name", [])
+        institution = _get_element_or_alt(data, "institution", [])
+        homepage = _get_element_or_alt(data, "homepage", [])
+        email = _get_element_or_alt(data, "email", []) 
 
         return PersonAgent(
             slug=slug, 
@@ -39,9 +78,9 @@ def load_agent_profile(slug):
         )
 
     elif data["type"] == CF.ORGANIZATION:
-        uri = get_element_or_empty(data, "uri", "")
-        name = get_element_or_empty(data, "name", [])
-        homepage = get_element_or_empty(data, "homepage", [])
+        uri = _get_element_or_alt(data, "uri", "")
+        name = _get_element_or_alt(data, "name", [])
+        homepage = _get_element_or_alt(data, "homepage", [])
 
         return OrganizationAgent(
             slug=slug,
@@ -51,10 +90,10 @@ def load_agent_profile(slug):
         )
 
     elif data["type"] == CF.SOFTWARE:
-        uri = get_element_or_empty(data, "uri", "")
-        name = get_element_or_empty(data, "name", "")
-        version = get_element_or_empty(data, "version", "")
-        homepage = get_element_or_empty(data, "homepage", "")
+        uri = _get_element_or_alt(data, "uri", "")
+        name = _get_element_or_alt(data, "name", "")
+        version = _get_element_or_alt(data, "version", "")
+        homepage = _get_element_or_alt(data, "homepage", "")
 
         return SoftwareAgent(
             slug=slug,
@@ -65,6 +104,7 @@ def load_agent_profile(slug):
         )
 
     return None
+
 
 def load_agent_profiles():
     agents = []
@@ -78,6 +118,9 @@ def load_agent_profiles():
 
 
 def agent_factory(slug, type_):
+    """
+    return "empty" agent class instance of the specified type
+    """
     if CF.agent_profile_exists(slug):
         return load_agent_profile(slug)
     else:
@@ -96,7 +139,7 @@ class OrganizationAgent(object):
         if uri:
             self.uri = uri
         else:
-            self.uri = provit_uri(slug)
+            self.uri = PROVIT[slug]
         self.name = name
         self.homepage = homepage
 
@@ -117,7 +160,7 @@ class OrganizationAgent(object):
         uri = URIRef(self.uri)
         g = Graph()
 
-        g.add( (uri, RDF.type, FOAF.Organization) )
+        g.add( (uri, RDF.type, PROV.Organization) )
 
         for name in self.name:
             g.add( (uri, FOAF.name, Literal(name)) )
@@ -126,6 +169,7 @@ class OrganizationAgent(object):
 
         return g
 
+
 class PersonAgent(object):
     def __init__(self, slug, name=[], institution=[], homepage=[], email=[], uri=""):
         self.type = CF.PERSON
@@ -133,7 +177,7 @@ class PersonAgent(object):
         if uri:
             self.uri = uri
         else:
-            self.uri = provit_uri(slug)
+            self.uri = PROVIT[slug]
         self.name = name
         self.institution = institution
         self.homepage = homepage
@@ -160,18 +204,19 @@ class PersonAgent(object):
         uri = URIRef(self.uri)
         g = Graph()
 
-        g.add( (uri, RDF.type, FOAF.Person) )
+        g.add( (uri, RDF.type, PROV.Person) )
 
         for name in self.name:
             g.add( (uri, FOAF.name, Literal(name)) )
         for institution in self.institution:
-            g.add( (uri, PROVIT.institution, Literal(institution)) )
+            g.add( (uri, FOAF.member, PROVIT[institution]) )
         for homepage in self.homepage:
             g.add( (uri, FOAF.homepage, Literal(homepage)) )
         for email in self.email:
-            g.add( (uri, PROVIT.email, Literal(email)) )
+            g.add( (uri, FOAF.mbox, Literal(email)) )
 
         return g
+
 
 class SoftwareAgent(object):
     def __init__(self, slug, name=[], version=[], homepage=[], uri=""):
@@ -180,7 +225,7 @@ class SoftwareAgent(object):
         if uri:
             self.uri = uri
         else:
-            self.uri = provit_uri(slug)
+            self.uri = PROVIT[slug]
         self.name = name
         self.version = version
         self.homepage = homepage
@@ -203,11 +248,11 @@ class SoftwareAgent(object):
     def graph(self):
         uri = URIRef(self.uri)
         g = Graph()
-        g.add( (uri, RDF.type, PROVIT.Software) )
+        g.add( (uri, RDF.type, PROV.SoftwareAgent) )
         for name in self.name:
             g.add( (uri, FOAF.name, Literal(name)) )
         for version in self.version:
-            g.add( (uri, PROVIT.softwareVersion, Literal(version)) )
+            g.add( (uri, SCHEMA.softwareVersion, Literal(version)) )
         for homepage in self.homepage:
             g.add( (uri, FOAF.homepage, Literal(homepage)) )
         return g

@@ -11,28 +11,26 @@ import os
 import yaml
 from pathlib import Path
 
-def add_dir(dirpath):
+def _add_dir(dirpath):
     if not os.path.exists(dirpath):
         os.mkdir(dirpath)
     return dirpath
 
-def add_file(filepath):
+def _add_file(filepath):
     if not os.path.exists(filepath):
         open(filepath, "w")
     return filepath
 
-def load_provit_dir():
+def _load_provit_dir():
     os_home = str(Path.home())    
-    provit_config_dir = add_dir(os.path.join(os_home, ".provit"))
-    filepath = add_file(os.path.join(provit_config_dir, "config.yaml"))
+    provit_config_dir = _add_dir(os.path.join(os_home, ".provit"))
+    filepath = _add_file(os.path.join(provit_config_dir, "config.yaml"))
 
-    stream = open(filepath, "r")
-    config = yaml.load(stream)
+    config = yaml.load(open(filepath, "r"))
 
     if config:  
         if "provit_dir" in config:
-            if not os.path.exists(config["provit_dir"]):
-                os.makedirs(config["provit_dir"])
+            _add_dir(config["provit_dir"])
             return config["provit_dir"]
 
     return provit_config_dir
@@ -40,17 +38,17 @@ def load_provit_dir():
 
 class CONFIG(object):
 
-    PROVIT_DIR = load_provit_dir()
-    AGENTS_DIR = add_dir(os.path.join(PROVIT_DIR, "agents"))
-    ACTIVITIES_DIR = add_dir(os.path.join(PROVIT_DIR, "activities"))
+    PROVIT_DIR = _load_provit_dir()
 
-    DIRECTORIES_FILE = add_file(os.path.join(PROVIT_DIR, "directories.yaml"))
+    AGENTS_DIR = _add_dir(os.path.join(PROVIT_DIR, "agents"))
+
+    DIRECTORIES_FILE = _add_file(os.path.join(PROVIT_DIR, "directories.yaml"))
 
     PERSON = 'Person'
-    SOFTWARE = 'Software'
+    SOFTWARE = 'SoftwareAgent'
     ORGANIZATION = 'Organization'
 
-    BASE_URI = "http://provit.diggr.link/{}"
+    BASE_URI = "http://vocab.ub.uni-leipzig.de/provit/{}"
 
     @staticmethod
     def agent_profile_exists(slug):

@@ -5,6 +5,7 @@ import webbrowser
 import logging
 
 from pathlib import Path
+from multiprocessing import Process
 
 from ..config import CONFIG as CF
 from ..home import load_directories, remove_directories, add_directory
@@ -226,7 +227,6 @@ def add_prov_data():
     else:
         started_at = prov_data["startedAt"]
         ended_at = prov_data["endedAt"]
-        print(started_at, ended_at)
 
     prov.add(
         agents=agents,
@@ -235,25 +235,11 @@ def add_prov_data():
         started_at=started_at,
         ended_at=ended_at
     )
-    prov.save()
-
-    for agent in agents:
-        agent_profile = load_agent_profile(agent)
-        if agent_profile:
-            prov.add_graph(agent_profile.graph())
-            prov.save()        
 
     prov.add_sources(sources)
-    prov.save() 
     
     for primary_source in primary_sources:
         prov.add_primary_source(primary_source)
-
-        agent_profile = load_agent_profile(primary_source)
-        if agent_profile:
-            prov.add_graph(agent_profile.graph())
-            prov.save()
-
 
     prov.save()
 
@@ -284,8 +270,6 @@ def config_update():
     pass
 
 
-
-
 #Provit browser route
 @app.route('/')
 @app.route('/directory/')
@@ -296,16 +280,22 @@ def index():
     return render_template("index.html")
 
 
+#####
+def start_backend(debug=False):
+    try:
+        app.run(debug=debug, port=PROVIS_PORT, use_reloader=False)
+    except OSError as e:
+        print("Cannot start provis server.")
+        sys.exit(1)
 
+def start_webbrowser():
+    time.sleep(1)
+    webbrowser.open("http://localhost:{}".format(PROVIS_PORT))
 
-def start_browser(debug=False):
-    n = os.fork()
-    if n > 0:
-        try:
-            app.run(debug=debug, port=PROVIS_PORT, use_reloader=False)
-        except OSError as e:
-            print("Cannot start provis server.")
-            sys.exit(1)
-    else:
-        time.sleep(1)
-        webbrowser.open("http://localhost:{}".format(PROVIS_PORT))
+def start_provit_browser(debug=False):
+    """
+    Start provit backend and open webbrowser
+    """
+    backend_process = Process(target=start_backend, args=(debug,))
+    backend_process.start()
+    start_webbrowser()
