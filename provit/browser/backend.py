@@ -100,7 +100,7 @@ def files_with_prov(directory):
                 "path": filepath
             }
 
-def build_file_list(directory):
+def _build_file_list(directory):
     files = []
     for filename in os.listdir(directory):
         filepath = os.path.join(directory, filename)
@@ -136,7 +136,7 @@ def build_file_list(directory):
 def file_list():
     directory = request.json["directory"]
 
-    files = build_file_list(directory)
+    files = _build_file_list(directory)
 
     return jsonify({
         "files": files
@@ -152,7 +152,7 @@ def update_file_list():
             prov.add(agents=[], activity="move_file", description="file moved to new location -> {}".format(directory))
             prov.save()
 
-    files = build_file_list(directory)
+    files = _build_file_list(directory)
     return jsonify({
         "files": files
     })
@@ -299,3 +299,4 @@ def start_provit_browser(debug=False):
     backend_process = Process(target=start_backend, args=(debug,))
     backend_process.start()
     start_webbrowser()
+p

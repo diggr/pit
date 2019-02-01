@@ -408,7 +408,7 @@ class Provenance(object):
 
         if CF.PERSON in types:
             email = [ str(o) for s, p, o in self.graph.triples( (agent_uri, FOAF.mbox, None) ) ]
-            institution = [ str(o) for s, p, o in self.graph.triples( (agent_uri, PROVIT.institution, None) ) ]
+            institution = [ str(o) for s, p, o in self.graph.triples( (agent_uri, FOAF.member, None) ) ]
             return {
                 "slug": slug,
                 "uri": str(agent_uri),
