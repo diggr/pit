@@ -165,7 +165,7 @@ def agent_list():
     for agent in agents:
         agents_structured[agent.type].append(agent.to_json())
     
-    print(agents_structured)
+    print(agents_structured.keys())
     return jsonify({
         "agents": agents_structured
     })

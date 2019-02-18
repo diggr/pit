@@ -109,6 +109,7 @@ def load_agent_profile(slug):
 def load_agent_profiles():
     agents = []
     for filename in os.listdir(CF.AGENTS_DIR):
+        print(filename)
         filepath = os.path.join(CF.AGENTS_DIR, filename)
         slug = filename.replace(".yaml", "")
 
