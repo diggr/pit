@@ -1,4 +1,4 @@
-P(ROV)IT - PROVenance integration tools
+PROVIT - PROVenance integration tools
 =======================================
 
 |Python 3.6| |GitHub license| |GitHub issues| |Docs passing|
@@ -6,7 +6,7 @@ P(ROV)IT - PROVenance integration tools
 PROVIT is a light, dezentralized provenance tracking framework. It allows
 the user to track workflows and modifications of data and files. 
 
-ROVIT works completely decentralized, all information is stored in .prov
+PROVIT works completely decentralized, all information is stored in .prov
 files (as JSON-LD RDF graphs) along it's corresponding data file in the file system.
 No central database or server setup is needed.  
 
