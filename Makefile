@@ -9,15 +9,15 @@ check: bandit black-check pip-check test ## Run all checks
 
 .PHONY: bandit
 bandit: ## Run bandit
-	python -m bandit -r project
+	python -m bandit -r provit
 
 .PHONY: black-check
 black-check: ## Check code formatting
-	python -m black --check project
+	python -m black --check provit
 
 .PHONY: black
 black: ## Format code
-	python -m black project
+	python -m black provit
 
 .PHONY: test
 test: ## Run unittests
@@ -49,13 +49,11 @@ export CUSTOM_COMPILE_COMMAND := make update-requirements
 .PHONY: update-requirements
 update-requirements: ## Regenerate requirements.txt with newest versions of dependencies
 	python -m piptools compile --rebuild --upgrade --quiet requirements.in
-	python -m piptools compile --rebuild --upgrade --quiet deploy/requirements.in
 	python -m piptools compile --rebuild --upgrade --quiet requirements-dev.in
 
 .PHONY: upgrade
 upgrade: ## Update all packages as available
 	python -m pip install --upgrade-strategy eager --upgrade $$(cat requirements.in | sed -n 's/==.*$$//p')
-	python -m pip install --upgrade-strategy eager --upgrade $$(cat deploy/requirements.in | sed -n 's/==.*$$//p')
 	python -m pip install --upgrade-strategy eager --upgrade $$(cat requirements-dev.in | sed -n 's/==.*$$//p')
 
 .PHONY: clean
