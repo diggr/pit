@@ -56,8 +56,21 @@ upgrade: ## Update all packages as available
 	python -m pip install --upgrade-strategy eager --upgrade $$(cat requirements.in | sed -n 's/==.*$$//p')
 	python -m pip install --upgrade-strategy eager --upgrade $$(cat requirements-dev.in | sed -n 's/==.*$$//p')
 
+.PHONY: build-frontend
+build-frontend: ## Build the frontend and copies it into the python application
+	cd frontend; npm run build
+	cp -r frontend/build/static provit/browser
+	mkdir -p provit/browser/templates/
+	cp frontend/build/index.html provit/browser/templates/index.html
+	sed -i -r "s@/static/([^\"]*)@{{ url_for('static', filename='\1')}}@g" provit/browser/templates/index.html
+
+.PHONY: install-frontend-modules
+install-frontend-modules: ## Install the frontend
+	cd frontend; npm install
+
 .PHONY: clean
 clean: ## Clean the project directory
+	rm -fr frontend/build
 	rm -fr build/
 	rm -fr dist/
 	rm -fr *.egg-info
