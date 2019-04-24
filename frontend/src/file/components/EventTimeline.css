@@ -1,0 +1,15 @@
+.vis-item {
+    font-size: 0.8em;
+    color: white;
+    background-color: #4CB2D4
+}
+
+.vis-item.vis-selected {
+    background-color: #f1521a;
+    border-color: #f1521a;
+    font-weight: bold;
+}
+
+.vis-label, .vis-text {
+    font-size: 0.7em;
+}
