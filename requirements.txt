@@ -13,6 +13,7 @@ jinja2==2.10.1            # via flask
 markupsafe==1.1.1         # via jinja2
 pyparsing==2.4.0          # via rdflib
 pyyaml==5.1
+rdflib-jsonld==0.4.0
 rdflib==4.2.2
 six==1.12.0               # via flask-cors, isodate
 werkzeug==0.15.2          # via flask
