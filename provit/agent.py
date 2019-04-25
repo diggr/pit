@@ -59,7 +59,7 @@ def load_agent_profile(slug):
     if not os.path.exists(filepath):
         return None
     
-    data = yaml.load(open(filepath, "r"))
+    data = yaml.safe_load(open(filepath, "r"))
     
     if data["type"] == CF.PERSON:
         uri = _get_element_or_alt(data, "uri", "")

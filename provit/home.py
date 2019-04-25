@@ -44,7 +44,7 @@ def load_directories():
     load the list of directories from the directories yaml file
     """
     stream = open(CONFIG.DIRECTORIES_FILE, "r")
-    data = yaml.load(stream)
+    data = yaml.safe_load(stream)
 
     if not data:
         data = {}

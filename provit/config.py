@@ -26,7 +26,7 @@ def _load_provit_dir():
     provit_config_dir = _add_dir(os.path.join(os_home, ".provit"))
     filepath = _add_file(os.path.join(provit_config_dir, "config.yaml"))
 
-    config = yaml.load(open(filepath, "r"))
+    config = yaml.safe_load(open(filepath, "r"))
 
     if config:  
         if "provit_dir" in config:
