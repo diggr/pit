@@ -84,7 +84,7 @@ Add provenace event to a file:
 
 .. code:: zsh
 
-    $ pit add FILEPATH [OPTIONS]
+    $ provit add FILEPATH [OPTIONS]
 
 Options:
 
@@ -120,12 +120,12 @@ Provenance Class
 Roadmap
 -------
 
-General Roadmap of the next steps in development
+General roadmap of the next steps in development
 
 - Tests
 - Tutorials
-- Platformsupport for Windows
-- Agent management in Frontend
+- Windows support
+- Agent management in PROVIT Browser
 
 Overview
 --------
