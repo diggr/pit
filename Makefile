@@ -21,7 +21,7 @@ black: ## Format code
 
 .PHONY: test
 test: ## Run unittests
-	python -m pytest --cov=./ $(PYTEST_ARGS)
+	python setup.py test
 
 .PHONY: git-flow
 git-flow: ## Initialize git-flow
