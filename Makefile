@@ -19,10 +19,6 @@ black-check: ## Check code formatting
 black: ## Format code
 	python -m black provit
 
-.PHONY: test
-test: ## Run unittests
-	python setup.py test
-
 .PHONY: git-flow
 git-flow: ## Initialize git-flow
 	@if [ $$(git-flow version 2>/dev/null | grep -c AVH) -lt 1 ]; then \
@@ -87,7 +83,7 @@ docs:
 	$(MAKE) -C docs html
 
 .PHONY: dist
-dist: 	clean lint test
+dist: 	clean 
 	python setup.py sdist bdist_wheel
 
 .PHONY: testupload

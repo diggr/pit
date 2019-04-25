@@ -27,13 +27,6 @@ setup(
     version="1.0.0",
     py_modules=["provit", "browser"],
     install_requires=requirements,
-    setup_requires=[
-        'pytest-runner',
-    ],
-    tests_require=[
-        'pytest',
-    ],
-    test_suite="pytest",
     include_package_data=True,
     entry_points="""
         [console_scripts]
