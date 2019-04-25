@@ -1,10 +1,10 @@
-PROVIT - PROVenance integration tools
+PROVIT - PROVenance Integration Tools
 =======================================
 
 |Python 3.6| |GitHub license| |GitHub issues| |Docs passing|
 
-PROVIT is a light, dezentralized provenance tracking framework. It allows
-the user to track workflows and modifications of data and files. 
+PROVIT is a light, dezentralized data provenance and documentation tools. It allows
+the user to track workflows and modifications of data-files. 
 
 PROVIT works completely decentralized, all information is stored in .prov
 files (as JSON-LD RDF graphs) along it's corresponding data file in the file system.
@@ -39,9 +39,8 @@ Clone the repository and create a virtual environment (optional) and install int
 
 .. code:: zsh
 
-    $ git clone https://github.com/diggr/provit
     $ mkvirtualenv provit
-    $ pip install ./provit
+    $ pip install provit
 
 git / Development
 ~~~~~~~~~~~~~~~~~
@@ -62,17 +61,20 @@ Install it with pip in *editable* mode
 Usage
 -----
 
-Provenance Integration Tools provide a command line client which can be
-used *out of the box* to enrich any file based data with provenance
-information. Furthermore the provenance class and vocabulary shipped
-with *provit* can be used within other applications.
+PROVIT provides a command line client which can be
+used to enrich any file based data with provenance
+information. 
+
+PROVIT also includes a (experimental) web-based interface (PROVIT Browser).
+
+
 
 Command Line Client
 ~~~~~~~~~~~~~~~~~~~
 
 Usage:
 
-Open provit Browser:
+Open PROVIT Browser:
 
 .. code:: zsh
 
@@ -86,12 +88,12 @@ Add provenace event to a file:
 
 Options:
 
--a AGENT, --agent AGENT    Provenance information: agent
+-a AGENT, --agent AGENT    Provenance information: agent (multiple=True)
 --activity ACTIVITY        Provenance information: activity
 -d DESCRIPTION, --desc DESCRIPTION     Provenance information: Description
                             of the data manipulation process
 -o ORIGIN, --origin ORIGIN    Provenance information: Data origin
--s SOURCES, --sources SOURCES    Provenance information: Source files
+-s SOURCES, --sources SOURCES    Provenance information: Source files (multiple=True)
 --help      Show this message and exit.
 
 Provenance Class
@@ -118,42 +120,12 @@ Provenance Class
 Roadmap
 -------
 
-General Roadmap containing features we'd like to realize in the project
+General Roadmap of the next steps in development
 
-- Add Persons to Agent, to allow more granular activity tracking
-
-Feature Wishlist
-~~~~~~~~~~~~~~~~
-
-A more detailed list of specific (smaller) features and functionality.
-
-Notify user if source referenced file changes
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Provenance files contain the version of a file if referenced, if an
-older version (i.e. not the current version) of a file is referenced, a
-warning should be displayed.
-
-File Browser
-^^^^^^^^^^^^
-
-A file browser showing e.g. all files with missing provenance.
-
-Reference Clustering
-^^^^^^^^^^^^^^^^^^^^
-
-Inspect files in your *research* folder, and display all references, to
-identify clusters. This could help structuring a messy research
-directory without breaking scripts, or at least knowing, which scripts
-possibly need to be updated.
-
-FAQ / Paradigms
----------------
-
-Can I add multiple agents to an activity?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Yes.
+- Tests
+- Tutorials
+- Platformsupport for Windows
+- Agent management in Frontend
 
 Overview
 --------
