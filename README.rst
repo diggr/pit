@@ -1,22 +1,29 @@
-P(ROV)IT - PROVenance integration tools
+PROVIT - PROVenance Integration Tools
 =======================================
 
 |Python 3.6| |GitHub license| |GitHub issues| |Docs passing|
 
-PROVIT is a light, dezentralized provenance tracking framework. It allows
-the user to track workflows and modifications of data and files. A
-small subset of the `W3C <https://www.w3.org/>`__ `PROV-O
-vocabulary <https://www.w3.org/TR/prov-o/>`__ is implemented. Its aim is to
-provided an easy to use interface for users who have never worked with provenance
-tracking before. It you feel limited by PROVIT you should have a look at
-the more extensive implementation `prov <https://github.com/trungdong/prov/>`__.
+PROVIT is a light, dezentralized data provenance and documentation tool. It allows
+the user to track workflows and modifications of data-files. 
+
+PROVIT works completely decentralized, all information is stored in .prov
+files (as JSON-LD RDF graphs) along it's corresponding data file in the file system.
+No additional database or server setup is needed.  
+
+A small subset of the `W3C <https://www.w3.org/>`__ `PROV-O
+vocabulary <https://www.w3.org/TR/prov-o/>`__ is implemented. 
+
+PROVIT aim to provided an easy to use interface for users who have never worked with provenance
+tracking before. If you feel limited by PROVIT you should have a look at
+more extensive implementations, e.g.: `prov <https://github.com/trungdong/prov/>`__.
 
 Full documentation is available under: `provit.readthedocs.io <https://provit.readthedocs.io/en/latest/>`__.
+
 
 Requirements
 ------------
 
-This Software was tested with Python 3.5 and 3.6.
+This software was tested on Linux with Python 3.5 and 3.6.
 
 Installation
 ------------
@@ -28,18 +35,13 @@ users. We strongly encourage end users to make use of a
 pip
 ~~~
 
-Clone the repository and create a virtualenv.
+Clone the repository and create a virtual environment (optional) and 
+install into with pip into the virtualenv.
 
 .. code:: zsh
 
-    $ git clone https://github.com/diggr/pit
     $ mkvirtualenv provit
-
-Install it with pip
-
-.. code:: zsh
-
-    $ pip install PATH_TO_PROVIT_REPOSITORY
+    $ pip install provit
 
 git / Development
 ~~~~~~~~~~~~~~~~~
@@ -48,43 +50,51 @@ Clone the repository and create a virtualenv.
 
 .. code:: zsh
 
-    $ git clone https://github.com/diggr/pit
+    $ git clone https://github.com/diggr/provit
     $ mkvirtualenv provit
 
 Install it with pip in *editable* mode
 
 .. code:: zsh
 
-    $ pip install -e PATH_TO_PROVI_REPOSITORY
+    $ pip install -e ./provit
 
 Usage
 -----
 
-Provenance Integration Tools provide a command line client which can be
-used *out of the box* to enrich any file based data with provenance
-information. Furthermore the provenance class and vocabulary shipped
-with *PIT* can be used within other applications.
+PROVIT provides a command line client which can be
+used to enrich any file based data with provenance
+information. 
+
+PROVIT also includes a (experimental) web-based interface 
+(PROVIT Browser).
+
 
 Command Line Client
 ~~~~~~~~~~~~~~~~~~~
 
 Usage:
 
+Open PROVIT Browser:
+
 .. code:: zsh
 
-    $ pit [OPTIONS] FILEPATH
+    $ provit browser
+
+Add provenace event to a file:
+
+.. code:: zsh
+
+    $ provit add FILEPATH [OPTIONS]
 
 Options:
 
---add    Add provenance information layer to file
--a AGENT, --agent AGENT    Provenance information: agent
+-a AGENT, --agent AGENT    Provenance information: agent (multiple=True)
 --activity ACTIVITY        Provenance information: activity
 -d DESCRIPTION, --desc DESCRIPTION     Provenance information: Description
                             of the data manipulation process
 -o ORIGIN, --origin ORIGIN    Provenance information: Data origin
--s SOURCES, --sources SOURCES    Provenance information: Source files
--b, --browser     Provenance browser
--n NAMESPACE, --namespace NAMESPACE    Provenance Namespace, default: http://provit.diggr.link/
+-s SOURCES, --sources SOURCES    Provenance information: Source files (multiple=True)
 --help      Show this message and exit.
 
 Provenance Class
@@ -92,15 +102,15 @@ Provenance Class
 
 .. code:: python
 
-    from pit.prov import Provenance
+    from provit import Provenance
 
     # load prov data for a file, or create new prov for file
     prov = Provenance(<filepath>)
 
     # add provenance metadata
-    prov.add(agent="agent", activity="activity", description="...")
-    prov.add_primary_source("primary_source", url="http://...", comment="...")
-    prov.add_sources(["filepath1", "filepath2"])
+    prov.add(agents=[ "agent" ], activity="activity", description="...")
+    prov.add_primary_source("primary_source")
+    prov.add_sources([ "filepath1", "filepath2" ])
 
     # return provenance as json tree
     prov_dict = prov.tree()
@@ -111,47 +121,12 @@ Provenance Class
 Roadmap
 -------
 
-General Roadmap containing features we'd like to realize in the project
+General roadmap of the next steps in development
 
-- Add Persons to Agent, to allow more granular activity tracking
-
-Feature Wishlist
-~~~~~~~~~~~~~~~~
-
-A more detailed list of specific (smaller) features and functionality.
-
-Notify user if source referenced file changes
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Provenance files contain the version of a file if referenced, if an
-older version (i.e. not the current version) of a file is referenced, a
-warning should be displayed.
-
-File Browser
-^^^^^^^^^^^^
-
-A file browser showing e.g. all files with missing provenance.
-
-Reference Clustering
-^^^^^^^^^^^^^^^^^^^^
-
-Inspect files in your *research* folder, and display all references, to
-identify clusters. This could help structuring a messy research
-directory without breaking scripts, or at least knowing, which scripts
-possibly need to be updated.
-
-FAQ / Paradigms
----------------
-
-Can I add multiple agents to an activity?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-No. The reason is: If you can distinguish the activities or impact of
-the agent, then you have multiple agents with *multiple activities*.
-E.g. if you let three students help you proofreading a file and you get
-back *1* revised version, then the three students are *1 agent* as you
-cannot distinguish between their results. If you get back *3 versions*
-you have *3 agents* and *3 activities*.
+- Tests
+- Tutorials
+- Windows support
+- Agent management in PROVIT Browser
 
 Overview
 --------

@@ -1,0 +1,17 @@
+.App {
+  text-align: center;
+}
+
+body {
+  padding:20px;
+  background-color: #fafafa;
+}
+
+.agentIconList div {
+  float: left;
+}
+.break {
+  clear: both
+}
+
+

@@ -22,22 +22,15 @@ setup(
     url='https://github.com/diggr/provit',
     packages=find_packages(exclude=['dev', 'docs']),
     package_dir={
-            'pit': 'pit'
+            'provit': 'provit'
         },
-    version="0.2.3",
-    py_modules=["tool", "pit"],
+    version="1.0.0",
+    py_modules=["provit", "browser"],
     install_requires=requirements,
-    setup_requires=[
-        'pytest-runner',
-    ],
-    tests_require=[
-        'pytest',
-    ],
-    test_suite="pytest",
     include_package_data=True,
     entry_points="""
         [console_scripts]
-        pit=pit.tool:cli
+        provit=provit.cli:cli
     """,
     classifiers=[
         'Development Status :: 3 - Alpha',
