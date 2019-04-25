@@ -3,19 +3,19 @@ PROVIT - PROVenance Integration Tools
 
 |Python 3.6| |GitHub license| |GitHub issues| |Docs passing|
 
-PROVIT is a light, dezentralized data provenance and documentation tools. It allows
+PROVIT is a light, dezentralized data provenance and documentation tool. It allows
 the user to track workflows and modifications of data-files. 
 
 PROVIT works completely decentralized, all information is stored in .prov
 files (as JSON-LD RDF graphs) along it's corresponding data file in the file system.
-No central database or server setup is needed.  
+No additional database or server setup is needed.  
 
-Asmall subset of the `W3C <https://www.w3.org/>`__ `PROV-O
+A small subset of the `W3C <https://www.w3.org/>`__ `PROV-O
 vocabulary <https://www.w3.org/TR/prov-o/>`__ is implemented. 
 
-Its aim is to provided an easy to use interface for users who have never worked with provenance
-tracking before. It you feel limited by PROVIT you should have a look at
-the more extensive implementation `prov <https://github.com/trungdong/prov/>`__.
+PROVIT aim to provided an easy to use interface for users who have never worked with provenance
+tracking before. If you feel limited by PROVIT you should have a look at
+more extensive implementations, e.g.: `prov <https://github.com/trungdong/prov/>`__.
 
 Full documentation is available under: `provit.readthedocs.io <https://provit.readthedocs.io/en/latest/>`__.
 
@@ -23,7 +23,7 @@ Full documentation is available under: `provit.readthedocs.io <https://provit.re
 Requirements
 ------------
 
-This Software was tested with Python 3.5 and 3.6.
+This software was tested on Linux with Python 3.5 and 3.6.
 
 Installation
 ------------
@@ -35,7 +35,8 @@ users. We strongly encourage end users to make use of a
 pip
 ~~~
 
-Clone the repository and create a virtual environment (optional) and install into with pip into the virtualenv.
+Clone the repository and create a virtual environment (optional) and 
+install into with pip into the virtualenv.
 
 .. code:: zsh
 
@@ -65,8 +66,8 @@ PROVIT provides a command line client which can be
 used to enrich any file based data with provenance
 information. 
 
-PROVIT also includes a (experimental) web-based interface (PROVIT Browser).
-
+PROVIT also includes a (experimental) web-based interface 
+(PROVIT Browser).
 
 
 Command Line Client
