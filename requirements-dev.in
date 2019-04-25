@@ -5,3 +5,4 @@ ipython==7.3.0
 pip-tools==3.5.0
 pytest==4.3.1
 pytest-cov==2.6.1
+twine==1.13.0
