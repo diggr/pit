@@ -24,7 +24,7 @@ setup(
     package_dir={
             'provit': 'provit'
         },
-    version="1.0.0",
+    version="1.0.1",
     py_modules=["provit", "browser"],
     install_requires=requirements,
     include_package_data=True,
