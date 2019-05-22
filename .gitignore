@@ -3,7 +3,7 @@ testdata/
 *.ttl
 *.png
 *.pyc
-__pychache__/
+__pycache__/
 pit/__pycache__/
 main.py
 .vscode/
