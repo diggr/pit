@@ -74,6 +74,9 @@ class Provenance(object):
         self.graph = Graph()
         self.file_name = os.path.basename(filepath)
 
+        if not os.path.exists(filepath):
+            raise IOError("File does not exist")
+
         self.prov_filepath = "{}.prov".format(filepath)
         self.location = os.path.abspath(filepath)
         self.timestamp = datetime.now().isoformat()
