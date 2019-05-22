@@ -254,17 +254,26 @@ class Provenance(object):
             filepaths = [filepaths]
         if not type(filepaths) == list:
             raise TypeError
-        else:
-            for filepath in filepaths:
-                if not os.path.exists(filepath):
-                    raise IOError
-                source_prov = Provenance(filepath)
-                source_entity = source_prov.entity
-                self.graph += source_prov.graph
-                self.graph.add((self.entity, PROV.wasDerivedFrom, source_entity))
 
-                if add_prov_to_source:
-                    source_prov.save()
+        for filepath in filepaths:
+            if not os.path.exists(filepath):
+                raise IOError("Source file does not exist")
+            source_prov = Provenance(filepath)
+
+            #create initial prov entry if none exists
+            if source_prov.tree() == {}:
+                source_prov.add(
+                    agents=['provit'],
+                    activity='initialize_provit',
+                    description='Initial provenance entry [automatically generated]'
+                )
+
+            source_entity = source_prov.entity
+            self.graph += source_prov.graph
+            self.graph.add((self.entity, PROV.wasDerivedFrom, source_entity))
+
+            if add_prov_to_source:
+                source_prov.save()
 
 
     def add_primary_source(self, primary_source, url=None, comment=None):
