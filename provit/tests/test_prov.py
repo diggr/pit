@@ -48,9 +48,25 @@ def test_invalid_prov_file():
     with pytest.raises(json.decoder.JSONDecodeError):
         prov = Provenance('provit/tests/tmp/invalid.csv')
 
+def test_add_incorrect_source_file():
+    """
+    Test adding a incorrect file as source
+    """
+
+    prov = Provenance('provit/tests/tmp/test.csv')
+    prov.add(
+        agents=['yada'],
+        activity='testing',
+        description='this is a testfunction'
+    )
+    with pytest.raises(IOError):
+        prov.add_sources(['provit/tests/tmp/source.txt', 'yada.clorf'])
+
+
 def test_add_source_prov():
     """
-    Test adding files as source
+    Test if created prov information for prov source file (with no
+    prior prov file) is correct
     """
 
     prov = Provenance('provit/tests/tmp/test.csv')
