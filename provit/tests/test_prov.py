@@ -11,71 +11,77 @@ import shutil
 import json
 from pathlib import Path
 
+TEST_FILE = "test.csv"
+SOURCE_FILE = "source.csv"
+INVALID_FILE = "invalid.csv"
+NO_FILE = "no_file.csv"
 
-def setup_module(module):
-    Path('provit/tests/tmp/').mkdir()
-    Path('provit/tests/tmp/test.csv').touch()
-    Path('provit/tests/tmp/source.txt').touch()
+@pytest.fixture(scope="session")
+def prov_files(tmp_path_factory):
+    base_path = tmp_path_factory.getbasetemp()
+    for f in (TEST_FILE, SOURCE_FILE):
+        base_path.joinpath(f).touch()
+    return base_path
 
-    Path('provit/tests/tmp/invalid.csv').touch()
-    with open('provit/tests/tmp/invalid.csv.prov', 'w') as invalid:
-        invalid.write('bla')
+@pytest.fixture(scope="session")
+def invalid_prov_file(tmp_path_factory):
+    base_path = tmp_path_factory.getbasetemp()
+    invalid_file = base_path.joinpath(INVALID_FILE)
+    invalid_file.touch()
+    with open(base_path / f"{INVALID_FILE}.prov", "w") as invalid:
+        invalid.write("bla")
+    return invalid_file
 
-def teardown_module(module):
-    #pass
-    shutil.rmtree('provit/tests/tmp')
-
-
-def test_incorrect_filepath():
+def test_incorrect_filepath(tmp_path):
     """
     Test if incorrect file name raises correct error
     """
     with pytest.raises(IOError):
-        prov = Provenance('no_file.csv')
+        prov = Provenance(tmp_path / NO_FILE)
 
-def test_file_without_prov():
+def test_file_without_prov(prov_files):
     """
     Test if file with no prov information creates empty Provenance
     Object
     """
-    prov = Provenance('provit/tests/tmp/test.csv')
+    prov = Provenance(prov_files / TEST_FILE)
     assert prov.tree() == {}
 
-def test_invalid_prov_file():
+def test_invalid_prov_file(invalid_prov_file):
     """
     Test if corrupt prov file raises correct error
     """    
     with pytest.raises(json.decoder.JSONDecodeError):
-        prov = Provenance('provit/tests/tmp/invalid.csv')
+        prov = Provenance(invalid_prov_file)
 
-def test_add_incorrect_source_file():
+def test_add_incorrect_source_file(prov_files):
     """
     Test adding a incorrect file as source
     """
 
-    prov = Provenance('provit/tests/tmp/test.csv')
+    prov = Provenance(prov_files / TEST_FILE)
     prov.add(
         agents=['yada'],
         activity='testing',
         description='this is a testfunction'
     )
     with pytest.raises(IOError):
-        prov.add_sources(['provit/tests/tmp/source.txt', 'yada.clorf'])
+        prov.add_sources([prov_files / NO_FILE])
 
 
-def test_add_source_prov():
+def test_add_source_prov(prov_files):
     """
     Test if created prov information for prov source file (with no
     prior prov file) is correct
     """
 
-    prov = Provenance('provit/tests/tmp/test.csv')
+    prov = Provenance(prov_files / TEST_FILE)
     prov.add(
         agents=['yada'],
         activity='testing',
         description='this is a testfunction'
     )
-    prov.add_sources(['provit/tests/tmp/source.txt'])
+    prov.add_sources([prov_files / SOURCE_FILE])
     prov.save()
 
     assert len(prov.tree()['sources']) == 1
