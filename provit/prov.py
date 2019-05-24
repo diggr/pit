@@ -33,6 +33,13 @@ from .config import CONFIG as CF
 from .agent import load_agent_profile
 
 
+
+
+# Initial provenance information for when a source file does not have a prov file
+ADD_SOURCE_PROV_ACTIVITY = 'initialize_provit'
+ADD_SOURCE_PROV_DESCRIPTION = 'Initialize provenance documentation for source file [automatically generated]'
+
+
 def load_prov(filepath, namespace=PROVIT):
     """
     Loads a Provenance Object from the given file path or returns None if no (valid) provenance file was found.
@@ -73,6 +80,9 @@ class Provenance(object):
         """
         self.graph = Graph()
         self.file_name = os.path.basename(filepath)
+
+        if not os.path.exists(filepath):
+            raise IOError("File does not exist")
 
         self.prov_filepath = "{}.prov".format(filepath)
         self.location = os.path.abspath(filepath)
@@ -251,17 +261,26 @@ class Provenance(object):
             filepaths = [filepaths]
         if not type(filepaths) == list:
             raise TypeError
-        else:
-            for filepath in filepaths:
-                if not os.path.exists(filepath):
-                    raise IOError
-                source_prov = Provenance(filepath)
-                source_entity = source_prov.entity
-                self.graph += source_prov.graph
-                self.graph.add((self.entity, PROV.wasDerivedFrom, source_entity))
 
-                if add_prov_to_source:
-                    source_prov.save()
+        for filepath in filepaths:
+            if not os.path.exists(filepath):
+                raise IOError("Source file does not exist")
+            source_prov = Provenance(filepath)
+
+            #create initial prov entry if none exists
+            if source_prov.tree() == {}:
+                source_prov.add(
+                    agents=['provit'],
+                    activity=ADD_SOURCE_PROV_ACTIVITY,
+                    description=ADD_SOURCE_PROV_DESCRIPTION
+                )
+
+            source_entity = source_prov.entity
+            self.graph += source_prov.graph
+            self.graph.add((self.entity, PROV.wasDerivedFrom, source_entity))
+
+            if add_prov_to_source:
+                source_prov.save()
 
 
     def add_primary_source(self, primary_source, url=None, comment=None):
