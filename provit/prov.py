@@ -33,6 +33,13 @@ from .config import CONFIG as CF
 from .agent import load_agent_profile
 
 
+
+
+# Initial provenance information for when a source file does not have a prov file
+ADD_SOURCE_PROV_ACTIVITY = 'initialize_provit'
+ADD_SOURCE_PROV_DESCRIPTION = 'Initialize provenance documentation for source file [automatically generated]'
+
+
 def load_prov(filepath, namespace=PROVIT):
     """
     Loads a Provenance Object from the given file path or returns None if no (valid) provenance file was found.
@@ -264,8 +271,8 @@ class Provenance(object):
             if source_prov.tree() == {}:
                 source_prov.add(
                     agents=['provit'],
-                    activity='initialize_provit',
-                    description='Initial provenance entry [automatically generated]'
+                    activity=ADD_SOURCE_PROV_ACTIVITY,
+                    description=ADD_SOURCE_PROV_DESCRIPTION
                 )
 
             source_entity = source_prov.entity
