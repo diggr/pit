@@ -10,7 +10,7 @@ main.py
 .idea
 pit/test
 .pytest_cache
-
+.coverage
 
 build/
 dist/
