@@ -36,8 +36,9 @@ from rdflib import Graph, Literal
 from rdflib.namespace import FOAF, URIRef, Namespace, RDF
 
 from .namespaces import PROVIT, PROV, SCHEMA
-from .config import CONFIG as CF
+from .config import get_config
 
+cfg = get_config()
 
 def _get_element_or_alt(data, element, alt):
     """
@@ -55,13 +56,13 @@ def load_agent_profile(slug):
     loads agent yaml profile (if available) and initiates agent 
     class with the values obtained from the yaml file
     """
-    filepath = os.path.join(CF.AGENTS_DIR, "{}.yaml".format(slug))
-    if not os.path.exists(filepath):
+    filepath = cfg.get_agent_profile(slug)
+    if not not filepath:
         return None
     
     data = yaml.safe_load(open(filepath, "r"))
     
-    if data["type"] == CF.PERSON:
+    if data["type"] == cfg.person:
         uri = _get_element_or_alt(data, "uri", "")
         name = _get_element_or_alt(data, "name", [])
         institution = _get_element_or_alt(data, "institution", [])
@@ -77,7 +78,7 @@ def load_agent_profile(slug):
             email=email
         )
 
-    elif data["type"] == CF.ORGANIZATION:
+    elif data["type"] == cfg.organization:
         uri = _get_element_or_alt(data, "uri", "")
         name = _get_element_or_alt(data, "name", [])
         homepage = _get_element_or_alt(data, "homepage", [])
@@ -89,7 +90,7 @@ def load_agent_profile(slug):
             homepage=homepage
         )
 
-    elif data["type"] == CF.SOFTWARE:
+    elif data["type"] == cfg.software:
         uri = _get_element_or_alt(data, "uri", "")
         name = _get_element_or_alt(data, "name", "")
         version = _get_element_or_alt(data, "version", "")
@@ -108,9 +109,9 @@ def load_agent_profile(slug):
 
 def load_agent_profiles():
     agents = []
-    for filename in os.listdir(CF.AGENTS_DIR):
+    for filename in os.listdir(cfg.agents_dir):
         print(filename)
-        filepath = os.path.join(CF.AGENTS_DIR, filename)
+        filepath = os.path.join(cfg.agents_dir, filename)
         slug = filename.replace(".yaml", "")
 
         agents.append(load_agent_profile(slug))
@@ -122,20 +123,20 @@ def agent_factory(slug, type_):
     """
     return "empty" agent class instance of the specified type
     """
-    if CF.agent_profile_exists(slug):
+    if cfg.agent_profile_exists(slug):
         return load_agent_profile(slug)
     else:
-        if type_ == CF.PERSON:
+        if type_ == cfg.person:
             return PersonAgent(slug)
-        elif type_ == CF.SOFTWARE:
+        elif type_ == cfg.software:
             return SoftwareAgent(slug)
-        elif type_ == CF.ORGANIZATION:
+        elif type_ == cfg.organization:
             return OrganizationAgent(slug)
 
 
 class OrganizationAgent(object):
     def __init__(self, slug, name=[], homepage=[], uri=""):
-        self.type = CF.ORGANIZATION
+        self.type = cfg.organization
         self.slug = slug
         if uri:
             self.uri = uri
@@ -173,7 +174,7 @@ class OrganizationAgent(object):
 
 class PersonAgent(object):
     def __init__(self, slug, name=[], institution=[], homepage=[], email=[], uri=""):
-        self.type = CF.PERSON
+        self.type = cfg.person
         self.slug = slug
         if uri:
             self.uri = uri
@@ -221,7 +222,7 @@ class PersonAgent(object):
 
 class SoftwareAgent(object):
     def __init__(self, slug, name=[], version=[], homepage=[], uri=""):
-        self.type = CF.SOFTWARE
+        self.type = cfg.software
         self.slug = slug
         if uri:
             self.uri = uri

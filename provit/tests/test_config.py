@@ -2,7 +2,6 @@ import yaml
 
 from ..config import (
     _load_provit_dir,
-    CONFIG,
     Config,
     get_config,
 )
@@ -22,9 +21,6 @@ def test_load_provit_dir_from_config(tmp_path):
         config_file.write(yaml.dump({"provit_dir" : str(custom_path.resolve())}))
     provit_dir = _load_provit_dir(orig_path)
     assert custom_path == provit_dir
-
-def test_config_class():
-    assert CONFIG.agent_profile_exists("pytest_agent") == False
 
 def test_get_config(tmp_path):
     assert isinstance(get_config(), Config)

@@ -1,6 +1,8 @@
 from rdflib import Namespace
-from .config import CONFIG as CF
+from .config import get_config
+
+cfg = get_config()
 
 PROV = Namespace("http://www.w3.org/ns/prov#")
 SCHEMA = Namespace("http://schema.org/")
-PROVIT = Namespace(CF.BASE_URI.format(""))
+PROVIT = Namespace(cfg.base_uri.format(""))

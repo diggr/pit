@@ -5,7 +5,9 @@ import json
 import os
 from itertools import combinations
 
-from .config import CONFIG as CF
+from .config import get_config
+
+cfg = get_config()
 
 def combine_fields(record1, record2, field):
     if field not in record1:
@@ -31,7 +33,7 @@ def combine_agents(agents1, agents2):
         else:
             update_dataset(agents1[slug], data, ["names", "institution", "homepage", "email"])
 
-        if os.path.exists(CF.agent_profile_file(slug)):
+        if os.path.exists(cfg.agent_profile_file(slug)):
             print(" ")
             print("yay")
             print("  ")
@@ -40,7 +42,7 @@ def combine_agents(agents1, agents2):
 
 
 def provit_uri(slug):
-    return CF.BASE_URI.format(slug)
+    return cfg.base_uri.format(slug)
 
 
 def load_jsonld(filepath):

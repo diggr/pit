@@ -5,10 +5,12 @@ Helper functions for accessing data in the provit home directory
 import os
 import yaml
 
-from .config import CONFIG 
+from .config import get_config
 from .utils import combine_agents
 from .prov import load_prov_files 
 from .agent import agent_factory
+
+cfg = get_config()
 
 def _iter_prov_files():
     """
@@ -34,7 +36,7 @@ def generate_agent_profiles():
             agent_list[slug].update(data)
             
     for slug, profile in agent_list.items():
-        filename = os.path.join(CONFIG.AGENTS_DIR, "{}.yaml".format(slug))
+        filename = os.path.join(cfg.agents_dir, "{}.yaml".format(slug))
         with open(filename, "w") as f:
             yaml.dump(profile.to_json(), f, default_flow_style=False)        
 
@@ -43,8 +45,8 @@ def load_directories():
     """
     load the list of directories from the directories yaml file
     """
-    stream = open(CONFIG.DIRECTORIES_FILE, "r")
-    data = yaml.safe_load(stream)
+    with open(cfg.directories_file) as d_file:
+        data = yaml.safe_load(d_file)
 
     if not data:
         data = {}
@@ -101,4 +103,5 @@ def _save_directories(directories):
     save current state of porject directories list to yaml file
     """
     data = { x["directory"]: { "comment": x["comment"].strip() } for x in directories }
-    yaml.dump(data, open(CONFIG.DIRECTORIES_FILE, "w"), default_flow_style=False)
+    with open(cfg.directories_file, "w") as d_file:
+        yaml.dump(data, default_flow_style=False)

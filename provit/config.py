@@ -1,9 +1,10 @@
 """
-provit configuration
+provit configuration module
 
-- Reads config.yaml from $HOME/.provit (or created new file if it doesn't exists)
-- Sets up provit home directory with agents/activities directories and directories.yaml (if they don't exist)
-- Provides CONFIG class, containing provit configuration information
+provides the Config-class as well as its factory method get_config.
+
+By default, $HOME/.provit is assumed to be provits default config directory.
+This can be customized.
 """
 
 
@@ -56,8 +57,17 @@ class Config:
         d_file.touch()
         return d_file
 
+    def agent_profile(self, slug):
+        return self.agents_dir.joinpath(f"{slug}.yaml")
+
     def agent_profile_exists(self, slug):
-        return self.agents_dir.joinpath(f"{slug}.yaml").is_file()
+        return self.agent_profile(slug).is_file()
+
+    def get_agent_profile(self, slug):
+        if self.agent_profile_exists:
+            return self.agent_profile(slug)
+        else:
+            return None
 
 def get_config(provit_dir=None):
     """
@@ -66,30 +76,3 @@ def get_config(provit_dir=None):
     chosen.
     """
     return Config(provit_dir=_load_provit_dir(provit_dir))
-
-
-
-class CONFIG(object):
-
-    warnings.warn("The CONFIG class is deprecated and should not be used anymore. Use the Config class instead.", DeprecationWarning, stacklevel=2)
-
-    PROVIT_DIR = _load_provit_dir()
-
-    AGENTS_DIR = PROVIT_DIR.joinpath("agents")
-    AGENTS_DIR.mkdir(exist_ok=True)
-
-    DIRECTORIES_FILE = PROVIT_DIR / "directories.yaml"
-    DIRECTORIES_FILE.touch()
-
-    PERSON = 'Person'
-    SOFTWARE = 'SoftwareAgent'
-    ORGANIZATION = 'Organization'
-
-    BASE_URI = "http://vocab.ub.uni-leipzig.de/provit/{}"
-
-    @staticmethod
-    def agent_profile_exists(slug):
-        filepath = CONFIG.AGENTS_DIR / "{}.yaml".format(slug)
-        return filepath.is_file()
-
-
