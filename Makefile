@@ -4,6 +4,10 @@
 help:
 	@grep -E '^[\.a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+.PHONY: test
+test: ## Run tests
+	pytest provit --cov=provit --disable-warnings
+
 .PHONY: check
 check: bandit black-check pip-check test ## Run all checks
 
