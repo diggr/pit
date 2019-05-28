@@ -3,6 +3,7 @@ testdata/
 *.ttl
 *.png
 *.pyc
+*.swp
 __pycache__/
 pit/__pycache__/
 main.py
