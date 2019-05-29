@@ -57,10 +57,11 @@ def load_agent_profile(slug):
     class with the values obtained from the yaml file
     """
     filepath = cfg.get_agent_profile(slug)
-    if not not filepath:
+    if not filepath:
         return None
-    
-    data = yaml.safe_load(open(filepath, "r"))
+   
+    with open(agent_file_path) as agent_file:
+        data = yaml.safe_load(agent_file)
     
     if data["type"] == cfg.person:
         uri = _get_element_or_alt(data, "uri", "")

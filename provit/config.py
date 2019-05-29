@@ -64,7 +64,7 @@ class Config:
         return self.agent_profile(slug).is_file()
 
     def get_agent_profile(self, slug):
-        if self.agent_profile_exists:
+        if self.agent_profile_exists(slug):
             return self.agent_profile(slug)
         else:
             return None
