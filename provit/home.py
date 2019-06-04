@@ -6,7 +6,6 @@ import os
 import yaml
 
 from .config import get_config
-from .utils import combine_agents
 from .prov import load_prov_files 
 from .agent import agent_factory
 

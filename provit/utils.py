@@ -9,38 +9,6 @@ from .config import get_config
 
 cfg = get_config()
 
-def combine_fields(record1, record2, field):
-    if field not in record1:
-        record1[field] = []
-    if field not in record2:
-        record2[field] = []
-
-    returnset = list(set(record1[field]).union(set(record2[field])))
-    return [x for x in returnset if x]
-
-def update_dataset(record1, record2, fields):
-    for field in fields:
-        combined = combine_fields(record1, record2, field)
-        if combined == []:
-            record1.pop(field)
-
-
-
-def combine_agents(agents1, agents2):
-    for slug, data in agents2.items():
-        if slug not in agents1:
-            agents1[slug] = data
-        else:
-            update_dataset(agents1[slug], data, ["names", "institution", "homepage", "email"])
-
-        if os.path.exists(cfg.agent_profile_file(slug)):
-            print(" ")
-            print("yay")
-            print("  ")
-
-    return agents1
-
-
 def provit_uri(slug):
     return cfg.base_uri.format(slug)
 
