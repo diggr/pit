@@ -30,5 +30,5 @@ def test_get_config(tmp_path):
     assert c.agents_dir == tmp_path / "agents"
     assert c.directories_file == tmp_path / "directories.yaml"
     c.agents_dir.joinpath("pytest-agent.yaml").touch()
-    print(list(c.agents_dir.glob("*")))
-    assert c.agent_profile_exists("pytest-agent") == True
+    assert c.get_agent_profile("pytest-agent") is not None
+    assert c.agent_profile_exists("pytest-agent-nonexistent") == False
