@@ -86,7 +86,7 @@ def add_directory(directory):
     Add directory to project directories list
     """
     dirs = load_directories()
-    
+
     # if directory already in current list do not add and return current list
     for d in dirs:
         if d["directory"] == directory["directory"]:
@@ -103,4 +103,4 @@ def _save_directories(directories):
     """
     data = { x["directory"]: { "comment": x["comment"].strip() } for x in directories }
     with open(cfg.directories_file, "w") as d_file:
-        yaml.dump(data, default_flow_style=False)
+        yaml.dump(data, d_file, default_flow_style=False)
