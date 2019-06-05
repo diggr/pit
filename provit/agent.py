@@ -56,8 +56,8 @@ def load_agent_profile(slug):
     loads agent yaml profile (if available) and initiates agent 
     class with the values obtained from the yaml file
     """
-    filepath = cfg.get_agent_profile(slug)
-    if not filepath:
+    agent_file_path = cfg.get_agent_profile(slug)
+    if not agent_file_path:
         return None
    
     with open(agent_file_path) as agent_file:
