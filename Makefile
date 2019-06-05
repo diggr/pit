@@ -6,7 +6,7 @@ help:
 
 .PHONY: test
 test: ## Run tests
-	pytest provit --cov=provit --cov-report term-missing:skip-covered 
+	pytest provit -v --cov=provit --cov-report term-missing:skip-covered
 
 .PHONY: check
 check: bandit black-check pip-check test ## Run all checks
