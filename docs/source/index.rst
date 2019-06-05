@@ -11,6 +11,7 @@ Welcome to Provit's documentation!
    :caption: Contents:
 
    readme
+   vocabulary
    modules
 
 Indices and tables
