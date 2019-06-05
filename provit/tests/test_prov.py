@@ -4,21 +4,23 @@
 """
 Tests for the proveneance object
 """
-
-from .. import Provenance
+import json
 import pytest
 import shutil
-import json
+import provit.prov
+
 from pathlib import Path
+from .. import Provenance
+
 
 TEST_FILE = "test.csv"
 SOURCE_FILE = "source.csv"
 INVALID_FILE = "invalid.csv"
 NO_FILE = "no_file.csv"
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def prov_files(tmp_path_factory):
-    base_path = tmp_path_factory.getbasetemp()
+    base_path = tmp_path_factory.mktemp("prov_files")
     for f in (TEST_FILE, SOURCE_FILE):
         base_path.joinpath(f).touch()
     return base_path
@@ -31,6 +33,39 @@ def invalid_prov_file(tmp_path_factory):
     with open(base_path / f"{INVALID_FILE}.prov", "w") as invalid:
         invalid.write("bla")
     return invalid_file
+
+def test_load_prov_on_non_existing_file(tmp_path):
+    assert provit.prov.load_prov(tmp_path / INVALID_FILE) == None 
+
+def test_load_prov_files(prov_files):
+    assert provit.prov.load_prov_files(prov_files) == []
+    prov = Provenance(prov_files / TEST_FILE)
+    prov.add(
+            agents=['yada'],
+            activity='testing',
+            description='this is a testfunction'
+    )
+    prov.save()
+    loaded_prov = provit.prov.load_prov_files(prov_files)[0]
+    assert loaded_prov.file_name == prov.file_name
+
+def test_overwrite(prov_files):
+    prov1 = Provenance(prov_files / TEST_FILE)
+    prov1.add(
+            agents=['yada'],
+            activity='testing',
+            description='this is a testfunction'
+    )
+    prov1.save()
+    prov2 = Provenance(prov_files / TEST_FILE, overwrite=True)
+    prov2.add(
+            agents=['yolo'],
+            activity='test123',
+            description='this is another testfunction'
+    )
+    prov2.save()
+    assert prov2.tree()['agent'] == ['http://vocab.ub.uni-leipzig.de/provit/yolo']
+
 
 def test_incorrect_filepath(tmp_path):
     """
