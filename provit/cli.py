@@ -12,10 +12,9 @@ import click
 import os
 import pprint
 import sys
-from .prov import Provenance, load_prov
+from .prov import Provenance
 from .browser import start_provit_browser
 from .home import add_directory
-from .agent import load_agent_profile
 
 
 @click.group()
@@ -48,9 +47,13 @@ def add(filepath, agent, activity, comment, sources, origin):
         sys.exit(1)
 
     prov = Provenance(filepath)
-    if agents and activity and comment:
-        prov.add(agents=agents, activity=activity, description=comment)
-        prov.save()
+    if agent or activity or comment:
+        if agent and activity and comment:
+            prov.add(agents=agent, activity=activity, description=comment)
+            prov.save()
+        else:
+            print("agent, activity and comment must be used together")
+            sys.exit(1)
 
     if sources:
         for source in sources:
