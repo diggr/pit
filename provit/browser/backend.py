@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 from multiprocessing import Process
 
-from ..config import get_config
+from ..config import CONFIG as CF
 from ..home import load_directories, remove_directories, add_directory
 from ..agent import load_agent_profiles, load_agent_profile
 from ..prov import Provenance, load_prov
@@ -25,8 +25,6 @@ log.disabled = True '''
 
 PROVIS_PORT = 5555
 
-
-cfg = get_config()
 
 
 # HOME VIEW (DIRECTORY LIST) 
@@ -163,7 +161,7 @@ def update_file_list():
 @app.route("/agents")
 def agent_list():
     agents = load_agent_profiles()
-    agents_structured = { cfg.person: [], cfg.software: [], cfg.organization: []}
+    agents_structured = { CF.PERSON: [], CF.SOFTWARE: [], CF.ORGANIZATION: []}
     for agent in agents:
         agents_structured[agent.type].append(agent.to_json())
     
@@ -259,7 +257,7 @@ def add_prov_data():
 
 @app.route('/config')
 def config():
-    provit_dir = cfg.provit_dir
+    provit_dir = CF.PROVIT_DIR
     return jsonify({
         "config": {
             "provit_dir": provit_dir
