@@ -3,15 +3,14 @@ testdata/
 *.ttl
 *.png
 *.pyc
-*.swp
-__pycache__/
+__pychache__/
 pit/__pycache__/
 main.py
 .vscode/
 .idea
 pit/test
 .pytest_cache
-.coverage
+
 
 build/
 dist/

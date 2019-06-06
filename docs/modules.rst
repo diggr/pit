@@ -1,7 +1,7 @@
-provit
-======
+pit
+===
 
 .. toctree::
    :maxdepth: 4
 
-   provit
+   pit
