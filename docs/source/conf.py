@@ -20,13 +20,13 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Provit'
-copyright = '2018, Universitätsbibliothek Leipzig'
+copyright = '2019, Universitätsbibliothek Leipzig'
 author = 'Universitätsbibliothek Leipzig'
 
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '0.1'
+release = '1.0.1'
 
 
 # -- General configuration ---------------------------------------------------

@@ -29,15 +29,16 @@ from rdflib.namespace import RDF, FOAF, RDFS
 
 from .namespaces import PROV, PROVIT, SCHEMA
 from .utils import load_jsonld
-from .config import CONFIG as CF
+from .config import get_config
 from .agent import load_agent_profile
-
-
 
 
 # Initial provenance information for when a source file does not have a prov file
 ADD_SOURCE_PROV_ACTIVITY = 'initialize_provit'
 ADD_SOURCE_PROV_DESCRIPTION = 'Initialize provenance documentation for source file [automatically generated]'
+
+
+cfg = get_config()
 
 
 def load_prov(filepath, namespace=PROVIT):
@@ -425,32 +426,32 @@ class Provenance(object):
         types = [ self._get_uri_slug(o) for s, p, o in self.graph.triples( (agent_uri, RDF.type, None ) ) ]
         print(types)
 
-        if CF.PERSON in types:
+        if cfg.person in types:
             email = [ str(o) for s, p, o in self.graph.triples( (agent_uri, FOAF.mbox, None) ) ]
             institution = [ str(o) for s, p, o in self.graph.triples( (agent_uri, FOAF.member, None) ) ]
             return {
                 "slug": slug,
                 "uri": str(agent_uri),
-                "type": CF.PERSON,
+                "type": cfg.person,
                 "name": names,
                 "homepage": homepage,
                 "email": email,
                 "institution": institution
             }
-        elif CF.ORGANIZATION in types:
+        elif cfg.organization in types:
             return {
                 "slug": slug,
                 "uri": str(agent_uri),
-                "type": CF.ORGANIZATION,
+                "type": cfg.organization,
                 "name": names,
                 "homepage": homepage
             }
-        elif CF.SOFTWARE in types:
+        elif cfg.software in types:
             version = [ str(o) for s, p, o in self.graph.triples( (agent_uri, SCHEMA.softwareVersion, None) ) ]
             return {
                 "slug": slug,
                 "uri": str(agent_uri),
-                "type": CF.SOFTWARE,
+                "type": cfg.software,
                 "name": names,
                 "homepage": homepage,
                 "version": version

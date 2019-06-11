@@ -1,0 +1,14 @@
+email:
+- john.doe@uni-leipzig.de
+- doe.john@ub.uni-leipzig.de
+homepage:
+- https://ub.uni-leipzig.de
+- https://diggr.link
+institution:
+- ubleipzig
+name:
+- "John Doe"
+- "J. Doe"
+- "John Dö"
+slug: johndoe
+type: Person
