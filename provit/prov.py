@@ -83,6 +83,7 @@ class Provenance(object):
         """
         self.graph = Graph()
         self.file_name = os.path.basename(filepath)
+        self.filepath = os.path.abspath(filepath)
 
         if not os.path.exists(filepath):
             raise IOError("File does not exist")
@@ -271,6 +272,12 @@ class Provenance(object):
         for filepath in filepaths:
             if not os.path.exists(filepath):
                 raise IOError("Source file does not exist")
+
+            if os.path.abspath(filepath) == self.filepath:
+                #raise IOError("Can't add same file as source file")
+                print("Can't add same file as source file")
+                continue
+
             source_prov = Provenance(filepath)
 
             # create initial prov entry if none exists
