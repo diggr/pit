@@ -1,6 +1,7 @@
 Click==7.0
-Flask==1.0.2
-flask_cors==3.0.7
+Flask==1.0.3
+flask_cors==3.0.8
 rdflib==4.2.2
 rdflib-jsonld==0.4.0
-PyYAML==5.1
+PyYAML==5.1.1
+
