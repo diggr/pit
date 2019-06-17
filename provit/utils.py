@@ -9,6 +9,7 @@ from .config import get_config
 
 cfg = get_config()
 
+
 def provit_uri(slug):
     return cfg.base_uri.format(slug)
 
@@ -18,7 +19,6 @@ def load_jsonld(filepath):
     Reads json-ld file and returns (rdfslib) graph and context
     """
 
-    print(filepath)
     if not os.path.exists(filepath):
         return (None, None)
 
@@ -42,10 +42,9 @@ def load_jsonld(filepath):
     except Exception:
         raise IOError("JSON-LD Error: Context missing.")
 
-    print(json.dumps(graph))
-
     g = Graph().parse(data=json.dumps(graph), format="json-ld", context=context)
     return (g, context)
+
 
 def walk_up(start_dir):
     """
@@ -53,8 +52,7 @@ def walk_up(start_dir):
     """
     up_dir = os.path.abspath(start_dir)
     yield up_dir
-    
+
     while up_dir != "/":
         up_dir = os.path.split(up_dir)[0]
         yield up_dir
-

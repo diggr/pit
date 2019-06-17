@@ -40,6 +40,7 @@ from .config import get_config
 
 cfg = get_config()
 
+
 def _get_element_or_alt(data, element, alt):
     """
     if :element: is in dict :data: return it, otherwise 
@@ -59,24 +60,24 @@ def load_agent_profile(slug):
     agent_file_path = cfg.get_agent_profile(slug)
     if not agent_file_path:
         return None
-   
+
     with open(agent_file_path) as agent_file:
         data = yaml.safe_load(agent_file)
-    
+
     if data["type"] == cfg.person:
         uri = _get_element_or_alt(data, "uri", "")
         name = _get_element_or_alt(data, "name", [])
         institution = _get_element_or_alt(data, "institution", [])
         homepage = _get_element_or_alt(data, "homepage", [])
-        email = _get_element_or_alt(data, "email", []) 
+        email = _get_element_or_alt(data, "email", [])
 
         return PersonAgent(
-            slug=slug, 
+            slug=slug,
             name=name,
             uri=uri,
             institution=institution,
             homepage=homepage,
-            email=email
+            email=email,
         )
 
     elif data["type"] == cfg.organization:
@@ -84,12 +85,7 @@ def load_agent_profile(slug):
         name = _get_element_or_alt(data, "name", [])
         homepage = _get_element_or_alt(data, "homepage", [])
 
-        return OrganizationAgent(
-            slug=slug,
-            name=name,
-            uri=uri,
-            homepage=homepage
-        )
+        return OrganizationAgent(slug=slug, name=name, uri=uri, homepage=homepage)
 
     elif data["type"] == cfg.software:
         uri = _get_element_or_alt(data, "uri", "")
@@ -98,11 +94,7 @@ def load_agent_profile(slug):
         homepage = _get_element_or_alt(data, "homepage", "")
 
         return SoftwareAgent(
-            slug=slug,
-            uri=uri,
-            name=name,
-            version=version,
-            homepage=homepage
+            slug=slug, uri=uri, name=name, version=version, homepage=homepage
         )
 
     return None
@@ -111,13 +103,12 @@ def load_agent_profile(slug):
 def load_agent_profiles():
     agents = []
     for filename in os.listdir(cfg.agents_dir):
-        print(filename)
         filepath = os.path.join(cfg.agents_dir, filename)
         slug = filename.replace(".yaml", "")
 
         agents.append(load_agent_profile(slug))
 
-    return [x for x in agents if x ]
+    return [x for x in agents if x]
 
 
 def agent_factory(slug, type_):
@@ -147,8 +138,8 @@ class OrganizationAgent(object):
         self.homepage = homepage
 
     def update(self, data):
-        self.name = list( set(self.name).union(set(data["name"])) )
-        self.homepage = list( set(self.homepage).union(set(data["homepage"])) )
+        self.name = list(set(self.name).union(set(data["name"])))
+        self.homepage = list(set(self.homepage).union(set(data["homepage"])))
 
     def to_json(self):
         return {
@@ -156,19 +147,19 @@ class OrganizationAgent(object):
             "slug": self.slug,
             "type": self.type,
             "name": self.name,
-            "homepage": self.homepage
+            "homepage": self.homepage,
         }
 
     def graph(self):
         uri = URIRef(self.uri)
         g = Graph()
 
-        g.add( (uri, RDF.type, PROV.Organization) )
+        g.add((uri, RDF.type, PROV.Organization))
 
         for name in self.name:
-            g.add( (uri, FOAF.name, Literal(name)) )
+            g.add((uri, FOAF.name, Literal(name)))
         for homepage in self.homepage:
-            g.add( (uri, FOAF.homepage, Literal(homepage)) )
+            g.add((uri, FOAF.homepage, Literal(homepage)))
 
         return g
 
@@ -187,10 +178,10 @@ class PersonAgent(object):
         self.email = email
 
     def update(self, data):
-        self.name = list( set(self.name).union(set(data["name"])) )
-        self.homepage = list( set(self.homepage).union(set(data["homepage"])) )
-        self.email = list( set(self.email).union(set(data["email"])) )
-        self.institution = list( set(self.institution).union(set(data["institution"])) )
+        self.name = list(set(self.name).union(set(data["name"])))
+        self.homepage = list(set(self.homepage).union(set(data["homepage"])))
+        self.email = list(set(self.email).union(set(data["email"])))
+        self.institution = list(set(self.institution).union(set(data["institution"])))
 
     def to_json(self):
         return {
@@ -200,23 +191,23 @@ class PersonAgent(object):
             "name": self.name,
             "institution": self.institution,
             "homepage": self.homepage,
-            "email": self.email
+            "email": self.email,
         }
 
     def graph(self):
         uri = URIRef(self.uri)
         g = Graph()
 
-        g.add( (uri, RDF.type, PROV.Person) )
+        g.add((uri, RDF.type, PROV.Person))
 
         for name in self.name:
-            g.add( (uri, FOAF.name, Literal(name)) )
+            g.add((uri, FOAF.name, Literal(name)))
         for institution in self.institution:
-            g.add( (uri, FOAF.member, PROVIT[institution]) )
+            g.add((uri, FOAF.member, PROVIT[institution]))
         for homepage in self.homepage:
-            g.add( (uri, FOAF.homepage, Literal(homepage)) )
+            g.add((uri, FOAF.homepage, Literal(homepage)))
         for email in self.email:
-            g.add( (uri, FOAF.mbox, Literal(email)) )
+            g.add((uri, FOAF.mbox, Literal(email)))
 
         return g
 
@@ -234,9 +225,9 @@ class SoftwareAgent(object):
         self.homepage = homepage
 
     def update(self, data):
-        self.name = list( set(self.name).union(set(data["name"])) )
-        self.homepage = list( set(self.homepage).union(set(data["homepage"])) )
-        self.version = list( set(self.version).union(set(data["version"])) )
+        self.name = list(set(self.name).union(set(data["name"])))
+        self.homepage = list(set(self.homepage).union(set(data["homepage"])))
+        self.version = list(set(self.version).union(set(data["version"])))
 
     def to_json(self):
         return {
@@ -245,17 +236,17 @@ class SoftwareAgent(object):
             "slug": self.slug,
             "name": self.name,
             "version": self.version,
-            "homepage": self.homepage
+            "homepage": self.homepage,
         }
-    
+
     def graph(self):
         uri = URIRef(self.uri)
         g = Graph()
-        g.add( (uri, RDF.type, PROV.SoftwareAgent) )
+        g.add((uri, RDF.type, PROV.SoftwareAgent))
         for name in self.name:
-            g.add( (uri, FOAF.name, Literal(name)) )
+            g.add((uri, FOAF.name, Literal(name)))
         for version in self.version:
-            g.add( (uri, SCHEMA.softwareVersion, Literal(version)) )
+            g.add((uri, SCHEMA.softwareVersion, Literal(version)))
         for homepage in self.homepage:
-            g.add( (uri, FOAF.homepage, Literal(homepage)) )
+            g.add((uri, FOAF.homepage, Literal(homepage)))
         return g

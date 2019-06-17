@@ -10,8 +10,8 @@ $ provit [options] FILE_PATH
 
 import click
 import os
-import pprint
 import sys
+
 from .prov import Provenance
 from .browser import start_provit_browser
 from .home import add_directory
@@ -36,11 +36,24 @@ def browser(directory):
 
 @cli.command()
 @click.argument("filepath")
-@click.option("--agent", "-a", multiple=True, default="", help="Provenance information: agent")
+@click.option(
+    "--agent", "-a", multiple=True, default="", help="Provenance information: agent"
+)
 @click.option("--activity", default="", help="Provenane information: activity")
-@click.option("--comment", "-c", default="", help="Provenance information: Description of the data manipulation process")
+@click.option(
+    "--comment",
+    "-c",
+    default="",
+    help="Provenance information: Description of the data manipulation process",
+)
 @click.option("--origin", "-o", default="", help="Provenance information: Data origin")
-@click.option("--sources", "-s", multiple=True, default="", help="Provenance information: Source files")
+@click.option(
+    "--sources",
+    "-s",
+    multiple=True,
+    default="",
+    help="Provenance information: Source files",
+)
 def add(filepath, agent, activity, comment, sources, origin):
     if not os.path.exists(filepath):
         print("Invalid filepath")

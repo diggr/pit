@@ -6,10 +6,11 @@ import os
 import yaml
 
 from .config import get_config
-from .prov import load_prov_files 
+from .prov import load_prov_files
 from .agent import agent_factory
 
 cfg = get_config()
+
 
 def load_directories():
     """
@@ -32,21 +33,23 @@ def load_directories():
 
     rv = []
     for directory, content in data.items():
-        rv.append({
-            "directory": directory,
-            "comment": content["comment"],
-            "exists": content["exists"]
-        })
+        rv.append(
+            {
+                "directory": directory,
+                "comment": content["comment"],
+                "exists": content["exists"],
+            }
+        )
 
-    return rv     
-    
+    return rv
+
 
 def remove_directories(directory):
     """
     Remove directories from project directory list
     """
     dirs = load_directories()
-    dirs = [ d for d in dirs if d["directory"] !=  directory["directory"]]
+    dirs = [d for d in dirs if d["directory"] != directory["directory"]]
     _save_directories(dirs)
 
     return dirs
@@ -72,6 +75,6 @@ def _save_directories(directories):
     """
     save current state of porject directories list to yaml file
     """
-    data = { x["directory"]: { "comment": x["comment"].strip() } for x in directories }
+    data = {x["directory"]: {"comment": x["comment"].strip()} for x in directories}
     with open(cfg.directories_file, "w") as d_file:
         yaml.dump(data, d_file, default_flow_style=False)
