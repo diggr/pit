@@ -61,10 +61,10 @@ def test_load_agent_profiles(prov_path_with_agents):
     # First we check for correct structure of returned agents_list
     assert len(agents) == 3
     assert isinstance(agents[0], agent.SoftwareAgent)
-    assert isinstance(agents[1], agent.OrganizationAgent)
-    assert isinstance(agents[2], agent.PersonAgent)
+    assert isinstance(agents[1], agent.PersonAgent)
+    assert isinstance(agents[2], agent.OrganizationAgent)
     # Then we check for correct properties of each agent
-    for i, a in enumerate([SA, OA, PA]):
+    for i, a in enumerate([SA, PA, OA]):
         check_attrs(agents[i], a)
 
 

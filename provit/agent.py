@@ -102,13 +102,15 @@ def load_agent_profile(slug):
 
 def load_agent_profiles():
     agents = []
-    for filename in os.listdir(cfg.agents_dir):
+    for filename in sorted(os.listdir(cfg.agents_dir)):
         filepath = os.path.join(cfg.agents_dir, filename)
         slug = filename.replace(".yaml", "")
 
-        agents.append(load_agent_profile(slug))
+        profile = load_agent_profile(slug)
+        if profile:
+            agents.append(profile)
 
-    return [x for x in agents if x]
+    return agents
 
 
 def agent_factory(slug, type_):
