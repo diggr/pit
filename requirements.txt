@@ -5,14 +5,14 @@
 #    make update-requirements
 #
 click==7.0
-flask==1.0.2
-flask_cors==3.0.7
+flask==1.0.3
+flask_cors==3.0.8
 isodate==0.6.0            # via rdflib
 itsdangerous==1.1.0       # via flask
 jinja2==2.10.1            # via flask
 markupsafe==1.1.1         # via jinja2
 pyparsing==2.4.0          # via rdflib
-pyyaml==5.1
+pyyaml==5.1.1
 rdflib-jsonld==0.4.0
 rdflib==4.2.2
 six==1.12.0               # via flask-cors, isodate
