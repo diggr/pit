@@ -19,6 +19,7 @@ more extensive implementations, e.g.: `prov <https://github.com/trungdong/prov/>
 
 Full documentation is available under: `provit.readthedocs.io <https://provit.readthedocs.io/en/latest/>`__.
 
+.. image:: assets/provit.png
 
 Requirements
 ------------

@@ -1,7 +1,6 @@
 testdata/
 *.prov
 *.ttl
-*.png
 *.pyc
 *.swp
 __pycache__/
