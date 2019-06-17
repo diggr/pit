@@ -82,7 +82,7 @@ clean: ## Clean the project directory
 docs:
 	rm -f docs/source/pit.rst
 	rm -f docs/source/modules.rst
-	sphinx-apidoc -o docs/source pit
+	sphinx-apidoc -o docs/source provit
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 
