@@ -36,7 +36,9 @@ from rdflib import Graph, Literal
 from rdflib.namespace import FOAF, URIRef, Namespace, RDF
 
 from .namespaces import PROVIT, PROV, SCHEMA
-from .config import CONFIG as CF
+from .config import get_config
+
+cfg = get_config()
 
 
 def _get_element_or_alt(data, element, alt):
@@ -55,52 +57,44 @@ def load_agent_profile(slug):
     loads agent yaml profile (if available) and initiates agent 
     class with the values obtained from the yaml file
     """
-    filepath = os.path.join(CF.AGENTS_DIR, "{}.yaml".format(slug))
-    if not os.path.exists(filepath):
+    agent_file_path = cfg.get_agent_profile(slug)
+    if not agent_file_path:
         return None
-    
-    data = yaml.safe_load(open(filepath, "r"))
-    
-    if data["type"] == CF.PERSON:
+
+    with open(agent_file_path) as agent_file:
+        data = yaml.safe_load(agent_file)
+
+    if data["type"] == cfg.person:
         uri = _get_element_or_alt(data, "uri", "")
         name = _get_element_or_alt(data, "name", [])
         institution = _get_element_or_alt(data, "institution", [])
         homepage = _get_element_or_alt(data, "homepage", [])
-        email = _get_element_or_alt(data, "email", []) 
+        email = _get_element_or_alt(data, "email", [])
 
         return PersonAgent(
-            slug=slug, 
+            slug=slug,
             name=name,
             uri=uri,
             institution=institution,
             homepage=homepage,
-            email=email
+            email=email,
         )
 
-    elif data["type"] == CF.ORGANIZATION:
+    elif data["type"] == cfg.organization:
         uri = _get_element_or_alt(data, "uri", "")
         name = _get_element_or_alt(data, "name", [])
         homepage = _get_element_or_alt(data, "homepage", [])
 
-        return OrganizationAgent(
-            slug=slug,
-            name=name,
-            uri=uri,
-            homepage=homepage
-        )
+        return OrganizationAgent(slug=slug, name=name, uri=uri, homepage=homepage)
 
-    elif data["type"] == CF.SOFTWARE:
+    elif data["type"] == cfg.software:
         uri = _get_element_or_alt(data, "uri", "")
         name = _get_element_or_alt(data, "name", "")
         version = _get_element_or_alt(data, "version", "")
         homepage = _get_element_or_alt(data, "homepage", "")
 
         return SoftwareAgent(
-            slug=slug,
-            uri=uri,
-            name=name,
-            version=version,
-            homepage=homepage
+            slug=slug, uri=uri, name=name, version=version, homepage=homepage
         )
 
     return None
@@ -108,34 +102,35 @@ def load_agent_profile(slug):
 
 def load_agent_profiles():
     agents = []
-    for filename in os.listdir(CF.AGENTS_DIR):
-        print(filename)
-        filepath = os.path.join(CF.AGENTS_DIR, filename)
+    for filename in sorted(os.listdir(cfg.agents_dir)):
+        filepath = os.path.join(cfg.agents_dir, filename)
         slug = filename.replace(".yaml", "")
 
-        agents.append(load_agent_profile(slug))
+        profile = load_agent_profile(slug)
+        if profile:
+            agents.append(profile)
 
-    return [x for x in agents if x ]
+    return agents
 
 
 def agent_factory(slug, type_):
     """
     return "empty" agent class instance of the specified type
     """
-    if CF.agent_profile_exists(slug):
+    if cfg.agent_profile_exists(slug):
         return load_agent_profile(slug)
     else:
-        if type_ == CF.PERSON:
+        if type_ == cfg.person:
             return PersonAgent(slug)
-        elif type_ == CF.SOFTWARE:
+        elif type_ == cfg.software:
             return SoftwareAgent(slug)
-        elif type_ == CF.ORGANIZATION:
+        elif type_ == cfg.organization:
             return OrganizationAgent(slug)
 
 
 class OrganizationAgent(object):
     def __init__(self, slug, name=[], homepage=[], uri=""):
-        self.type = CF.ORGANIZATION
+        self.type = cfg.organization
         self.slug = slug
         if uri:
             self.uri = uri
@@ -145,8 +140,8 @@ class OrganizationAgent(object):
         self.homepage = homepage
 
     def update(self, data):
-        self.name = list( set(self.name).union(set(data["name"])) )
-        self.homepage = list( set(self.homepage).union(set(data["homepage"])) )
+        self.name = list(set(self.name).union(set(data["name"])))
+        self.homepage = list(set(self.homepage).union(set(data["homepage"])))
 
     def to_json(self):
         return {
@@ -154,26 +149,26 @@ class OrganizationAgent(object):
             "slug": self.slug,
             "type": self.type,
             "name": self.name,
-            "homepage": self.homepage
+            "homepage": self.homepage,
         }
 
     def graph(self):
         uri = URIRef(self.uri)
         g = Graph()
 
-        g.add( (uri, RDF.type, PROV.Organization) )
+        g.add((uri, RDF.type, PROV.Organization))
 
         for name in self.name:
-            g.add( (uri, FOAF.name, Literal(name)) )
+            g.add((uri, FOAF.name, Literal(name)))
         for homepage in self.homepage:
-            g.add( (uri, FOAF.homepage, Literal(homepage)) )
+            g.add((uri, FOAF.homepage, Literal(homepage)))
 
         return g
 
 
 class PersonAgent(object):
     def __init__(self, slug, name=[], institution=[], homepage=[], email=[], uri=""):
-        self.type = CF.PERSON
+        self.type = cfg.person
         self.slug = slug
         if uri:
             self.uri = uri
@@ -185,10 +180,10 @@ class PersonAgent(object):
         self.email = email
 
     def update(self, data):
-        self.name = list( set(self.name).union(set(data["name"])) )
-        self.homepage = list( set(self.homepage).union(set(data["homepage"])) )
-        self.email = list( set(self.email).union(set(data["email"])) )
-        self.institution = list( set(self.institution).union(set(data["institution"])) )
+        self.name = list(set(self.name).union(set(data["name"])))
+        self.homepage = list(set(self.homepage).union(set(data["homepage"])))
+        self.email = list(set(self.email).union(set(data["email"])))
+        self.institution = list(set(self.institution).union(set(data["institution"])))
 
     def to_json(self):
         return {
@@ -198,30 +193,30 @@ class PersonAgent(object):
             "name": self.name,
             "institution": self.institution,
             "homepage": self.homepage,
-            "email": self.email
+            "email": self.email,
         }
 
     def graph(self):
         uri = URIRef(self.uri)
         g = Graph()
 
-        g.add( (uri, RDF.type, PROV.Person) )
+        g.add((uri, RDF.type, PROV.Person))
 
         for name in self.name:
-            g.add( (uri, FOAF.name, Literal(name)) )
+            g.add((uri, FOAF.name, Literal(name)))
         for institution in self.institution:
-            g.add( (uri, FOAF.member, PROVIT[institution]) )
+            g.add((uri, FOAF.member, PROVIT[institution]))
         for homepage in self.homepage:
-            g.add( (uri, FOAF.homepage, Literal(homepage)) )
+            g.add((uri, FOAF.homepage, Literal(homepage)))
         for email in self.email:
-            g.add( (uri, FOAF.mbox, Literal(email)) )
+            g.add((uri, FOAF.mbox, Literal(email)))
 
         return g
 
 
 class SoftwareAgent(object):
     def __init__(self, slug, name=[], version=[], homepage=[], uri=""):
-        self.type = CF.SOFTWARE
+        self.type = cfg.software
         self.slug = slug
         if uri:
             self.uri = uri
@@ -232,9 +227,9 @@ class SoftwareAgent(object):
         self.homepage = homepage
 
     def update(self, data):
-        self.name = list( set(self.name).union(set(data["name"])) )
-        self.homepage = list( set(self.homepage).union(set(data["homepage"])) )
-        self.version = list( set(self.version).union(set(data["version"])) )
+        self.name = list(set(self.name).union(set(data["name"])))
+        self.homepage = list(set(self.homepage).union(set(data["homepage"])))
+        self.version = list(set(self.version).union(set(data["version"])))
 
     def to_json(self):
         return {
@@ -243,17 +238,17 @@ class SoftwareAgent(object):
             "slug": self.slug,
             "name": self.name,
             "version": self.version,
-            "homepage": self.homepage
+            "homepage": self.homepage,
         }
-    
+
     def graph(self):
         uri = URIRef(self.uri)
         g = Graph()
-        g.add( (uri, RDF.type, PROV.SoftwareAgent) )
+        g.add((uri, RDF.type, PROV.SoftwareAgent))
         for name in self.name:
-            g.add( (uri, FOAF.name, Literal(name)) )
+            g.add((uri, FOAF.name, Literal(name)))
         for version in self.version:
-            g.add( (uri, SCHEMA.softwareVersion, Literal(version)) )
+            g.add((uri, SCHEMA.softwareVersion, Literal(version)))
         for homepage in self.homepage:
-            g.add( (uri, FOAF.homepage, Literal(homepage)) )
+            g.add((uri, FOAF.homepage, Literal(homepage)))
         return g
