@@ -18,6 +18,7 @@ CONFIG_FILE = "config.yaml"
 AGENTS_DIR = "agents"
 PROVIT_DIR = ".provit"
 
+
 def _load_provit_dir(custom_provit_config_dir=None):
     if custom_provit_config_dir:
         provit_config_dir = Path(custom_provit_config_dir)
@@ -40,9 +41,9 @@ def _load_provit_dir(custom_provit_config_dir=None):
 @dataclass
 class Config:
     provit_dir: Path
-    person: str  = 'Person'
-    software: str = 'SoftwareAgent'
-    organization: str = 'Organization'
+    person: str = "Person"
+    software: str = "SoftwareAgent"
+    organization: str = "Organization"
     base_uri: str = "http://vocab.ub.uni-leipzig.de/provit/{}"
 
     @property
@@ -68,6 +69,7 @@ class Config:
             return self.agent_profile(slug)
         else:
             return None
+
 
 def get_config(provit_dir=None):
     """
