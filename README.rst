@@ -1,29 +1,30 @@
-PROVIT - PROVenance Integration Tools
-=======================================
+provit - Provenance Integration Tools
+=====================================
 
-|Python 3.6| |GitHub license| |GitHub issues| |Docs passing|
+|Python 3| |GitHub license| |GitHub issues| |Docs passing|
 
-PROVIT is a light, dezentralized data provenance and documentation tool. It allows
-the user to track workflows and modifications of data-files. 
+*provit* is a data provenance annotation and documentation tool. It provides various feature for
+creation and retrieval of provenance information for file like stored data. Tracking sources, 
+modification, and merges allows the user to keep track of data provenance in long running 
+workflows (e.g. for a scientific thesis).
 
-PROVIT works completely decentralized, all information is stored in .prov
-files (as JSON-LD RDF graphs) along it's corresponding data file in the file system.
-No additional database or server setup is needed.  
+*provit* does not require any external infrastructure. All information is stored in *.prov* 
+files right next to the data files as a JSON-LD graph. This makes it the perfect tool for small 
+teams or individual researchers. 
 
-A small subset of the `W3C <https://www.w3.org/>`__ `PROV-O
-vocabulary <https://www.w3.org/TR/prov-o/>`__ is implemented. 
+To allow interoperatibility, a small subset of the `W3C <https://www.w3.org/>`__ `PROV-O
+vocabulary <https://www.w3.org/TR/prov-o/>`__ is implemented. Therefore, the provenance 
+information can easily be merge in a linked data graph if necessary, at a later stage of the project.
 
-PROVIT aim to provided an easy to use interface for users who have never worked with provenance
-tracking before. If you feel limited by PROVIT you should have a look at
+*provit* aims to provided an easy to use interface for users who have never worked with provenance
+tracking before. You can operate the tool using the 
+
+If you feel limited by PROVIT you should have a look at
 more extensive implementations, e.g.: `prov <https://github.com/trungdong/prov/>`__.
 
 Full documentation is available under: `provit.readthedocs.io <https://provit.readthedocs.io/en/latest/>`__.
 
-
-Requirements
-------------
-
-This software was tested on Linux with Python 3.5 and 3.6.
+.. image:: assets/provit_promo.png
 
 Installation
 ------------
@@ -53,52 +54,54 @@ Clone the repository and create a virtualenv.
     $ git clone https://github.com/diggr/provit
     $ mkvirtualenv provit
 
-Install it with pip in *editable* mode
+Install it with pip (*editable*).
 
 .. code:: zsh
 
-    $ pip install -e ./provit
+    $ pip install -e provit
 
-Usage
------
+Quickstart
+----------
 
-PROVIT provides a command line client which can be
-used to enrich any file based data with provenance
-information. 
+*provit* provides three modes of interaction:
 
-PROVIT also includes a (experimental) web-based interface 
-(PROVIT Browser).
+* command line interface
+* graphical user interface 
+* python package
 
+All of them allow you to track provenance, but the *provit browser* 
+additionally lets you explore tracked provenance.
 
-Command Line Client
-~~~~~~~~~~~~~~~~~~~
+provit browser
+~~~~~~~~~~~~~~
 
-Usage:
-
-Open PROVIT Browser:
+You can start provit browser directly from your terminal:
 
 .. code:: zsh
 
     $ provit browser
 
-Add provenace event to a file:
+
+provit cli
+~~~~~~~~~~
+
+Simply *cd* to the directory, where your data is located, create (or append to an already existing) provenance file. 
 
 .. code:: zsh
 
     $ provit add FILEPATH [OPTIONS]
 
-Options:
+The --help command shows you the full list of available options and arguments.
 
--a AGENT, --agent AGENT    Provenance information: agent (multiple=True)
---activity ACTIVITY        Provenance information: activity
--d DESCRIPTION, --desc DESCRIPTION     Provenance information: Description
-                            of the data manipulation process
--o ORIGIN, --origin ORIGIN    Provenance information: Data origin
--s SOURCES, --sources SOURCES    Provenance information: Source files (multiple=True)
---help      Show this message and exit.
+.. code:: zsh
 
-Provenance Class
+    $ provit --help
+
+provit package
 ~~~~~~~~~~~~~~~~
+
+Using provit in your ETL pipeline is easy. simply import the Proveance class
+and start using it (e.g. as displayed below).
 
 .. code:: python
 
@@ -121,12 +124,11 @@ Provenance Class
 Roadmap
 -------
 
-General roadmap of the next steps in development
+We have a small roadmap, which we will make transparent below:
 
-- Tests
-- Tutorials
-- Windows support
-- Agent management in PROVIT Browser
+* Increase test coverage (currently 81%)
+* Windows support (all devs are on Linux)
+* Agent management in PROVIT Browser 
 
 Overview
 --------
@@ -135,9 +137,9 @@ Overview
     P. Mühleder muehleder@ub.uni-leipzig.de,
     F. Rämisch raemisch@ub.uni-leipzig.de
 :License: MIT
-:Copyright: 2018, Peter Mühleder and `Universitätsbibliothek Leipzig <https://ub.uni-leipzig.de>`__
+:Copyright: 2018-2019, Peter Mühleder and `Universitätsbibliothek Leipzig <https://ub.uni-leipzig.de>`__
 
-.. |Python 3.6| image:: https://img.shields.io/badge/Python-3.6-blue.svg
+.. |Python 3| image:: https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7-blue.svg
 .. |GitHub license| image:: https://img.shields.io/github/license/diggr/pit.svg
    :target: https://github.com/diggr/pit/blob/master/LICENSE
 .. |GitHub issues| image:: https://img.shields.io/github/issues/diggr/pit.svg

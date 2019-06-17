@@ -19,6 +19,7 @@ provit.agent module
    :members:
    :undoc-members:
    :show-inheritance:
+
 provit.cli module
 -----------------
 
@@ -26,6 +27,7 @@ provit.cli module
    :members:
    :undoc-members:
    :show-inheritance:
+
 provit.config module
 --------------------
 
@@ -33,6 +35,7 @@ provit.config module
    :members:
    :undoc-members:
    :show-inheritance:
+
 provit.home module
 ------------------
 
