@@ -3,7 +3,9 @@ bandit==1.5.1
 black==19.3b0
 ipython==7.3.0
 pip-tools==3.5.0
-pytest==4.3.1
+pytest==4.6.3
 pytest-cov==2.7.1
+pytest-flask==0.15.0
+pytest-mock==1.10.4
 Sphinx==2.1.0
 twine==1.13.0
