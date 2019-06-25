@@ -1,4 +1,5 @@
 import click
+import json
 import pytest
 import shutil
 
@@ -123,3 +124,25 @@ def test_cli_add_sources(test_file_with_prov):
     assert result.exit_code == 0
     print(Provenance(new_file).tree()["sources"][0], Provenance(test_file).tree())
     assert Provenance(new_file).tree()["sources"][0] == Provenance(test_file).tree()
+
+def test_cli_show(test_file_with_prov):
+    base_path, test_file, prov_file = test_file_with_prov
+    runner = CliRunner()
+    
+    # Test on file with prov
+    result = runner.invoke(cli, ["show", str(test_file)])
+    print(result.output)
+    assert result.exit_code == 0
+    prov = json.loads(result.output)
+    assert prov["activity"].startswith("http://vocab.ub.uni-leipzig.de/provit/testing/")
+    assert prov["activity_desc"] == 'test'
+    assert prov["agent"] == ['http://vocab.ub.uni-leipzig.de/provit/testagent']
+    assert prov["uri"].startswith("http://vocab.ub.uni-leipzig.de/provit/test_file_txt/")
+
+    # Test on file without prov
+    new_file = base_path / "new.txt"
+    new_file.touch()
+    result = runner.invoke(cli, ["show", str(new_file)])
+    result.exit_code == 1
+
+  
