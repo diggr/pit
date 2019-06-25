@@ -131,13 +131,13 @@ class EventNetwork extends Component {
             if (root.primary_sources) {
                 for (const ps of root.primary_sources) {
                     this.nodes.update({
-                        id: ps.uri,
-                        label: "Primary source\n<b>"+ps.slug+"</b>",
+                        id: ps,
+                        label: "<i>Primary source</i>\n<b>"+getFilename(ps)+"</b>",
                         group: 'primarySource'
                     })
                     this.edges.update({
                         from: source,
-                        to: ps.uri,
+                        to: ps,
                         arrows: 'from'
                     })                
                 }

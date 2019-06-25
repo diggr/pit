@@ -105,9 +105,7 @@ def test_cli_add_origin(test_file_with_prov):
     result = runner.invoke(cli, ["add", "--origin", str(test_file), str(new_file)])
     assert result.exit_code == 0
     p = Provenance(new_file)
-    assert p.tree()["primary_sources"][0][
-        "uri"
-    ] == "http://vocab.ub.uni-leipzig.de/provit" + str(test_file)
+    assert p.tree()["primary_sources"][0] == "http://vocab.ub.uni-leipzig.de/provit" + str(test_file)
 
 
 def test_cli_add_sources(test_file_with_prov):
