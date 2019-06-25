@@ -225,8 +225,6 @@ def create_app(cfg=None):
 
         prov.save()
 
-        if not prov:
-            return jsonify({})
         return jsonify(
             {
                 "hasProv": True,

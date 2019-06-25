@@ -116,61 +116,59 @@ class EventNetwork extends Component {
         if (root.location === filename)
             group = 'file'
 
-        if (root.status === 'active')
-        {
 
-            currentNodes.push(source)
-            this.nodes.update({
-                id: source,
-                label: generateLabel(root),
-                group: group,
-                start: root.ended_at,
-                content: generateLabel(root)
-            })
-        
-            if (root.primary_sources) {
-                for (const ps of root.primary_sources) {
-                    this.nodes.update({
-                        id: ps,
-                        label: "<i>Primary source</i>\n<b>"+getFilename(ps)+"</b>",
-                        group: 'primarySource'
-                    })
-                    this.edges.update({
-                        from: source,
-                        to: ps,
-                        arrows: 'from'
-                    })                
-                }
+
+        currentNodes.push(source)
+        this.nodes.update({
+            id: source,
+            label: generateLabel(root),
+            group: group,
+            start: root.ended_at,
+            content: generateLabel(root)
+        })
+    
+        if (root.primary_sources) {
+            for (const ps of root.primary_sources) {
+                this.nodes.update({
+                    id: ps,
+                    label: "<i>Primary source</i>\n<b>"+getFilename(ps)+"</b>",
+                    group: 'primarySource'
+                })
+                this.edges.update({
+                    from: source,
+                    to: ps,
+                    arrows: 'from'
+                })                
             }
+        }
+    
+    
+        if (root.sources) {
+            for (const source_data of root.sources) {
+                const target = source_data.uri
         
-        
-            if (root.sources) {
-                for (const source_data of root.sources) {
-                    const target = source_data.uri
-            
-                    const filename = this.props.prov.location
-                    let group = 'source'
-                    if (source_data.location === filename)
-                        group = 'file'
+                const filename = this.props.prov.location
+                let group = 'source'
+                if (source_data.location === filename)
+                    group = 'file'
 
-                    currentNodes.push(target)
-                    this.nodes.update({
-                        id: target,
-                        label: generateLabel(source_data),
-                        group: group,
-                        start: source_data.ended_at,
-                        content: generateLabel(source_data)
-                    })
-        
-                    this.edges.update({
-                        from: source,
-                        to: target,
-                        arrows: 'from'
-                    })
-                }
-                for (const source_data of root.sources) {
-                    this.iterProvData(source_data)
-                }
+                currentNodes.push(target)
+                this.nodes.update({
+                    id: target,
+                    label: generateLabel(source_data),
+                    group: group,
+                    start: source_data.ended_at,
+                    content: generateLabel(source_data)
+                })
+    
+                this.edges.update({
+                    from: source,
+                    to: target,
+                    arrows: 'from'
+                })
+            }
+            for (const source_data of root.sources) {
+                this.iterProvData(source_data)
             }
         }     
     }

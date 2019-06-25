@@ -269,7 +269,9 @@ def test_file_timespan_add_remove(client, path_with_directories):
     assert result["hasProv"] == True
     prov = result["prov"]
     assert prov["activity_desc"] == ACTIVITY_DESC
-    assert prov["primary_sources"][0] == "http://vocab.ub.uni-leipzig.de/provit/diggr.link"
+    assert (
+        prov["primary_sources"][0] == "http://vocab.ub.uni-leipzig.de/provit/diggr.link"
+    )
     assert prov["started_at"].startswith("2019-06-21 12:09:39")
     assert prov["ended_at"].startswith("2019-06-21 12:19:39")
     assert prov["activity"].startswith(

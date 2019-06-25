@@ -133,3 +133,8 @@ def test_get_current_location(prov_files, test_filenames, prov_path_with_agents)
     assert str(prov.get_current_location()) == str(
         prov_files / test_filenames["TEST_FILE"]
     )
+
+
+def test_empty_prov(prov_files, test_filenames):
+    prov = provit.prov.Provenance(prov_files / test_filenames["TEST_FILE"])
+    assert prov.tree() == {}
