@@ -4,7 +4,7 @@ import shutil
 
 from click.testing import CliRunner
 from pathlib import Path
-
+from pprint import pprint
 from ..cli import cli
 from ..prov import Provenance, load_prov
 
@@ -30,7 +30,7 @@ def add_test_prov(test_file):
 
 @pytest.fixture
 def test_file_path(tmp_path_factory):
-    base_path = tmp_path_factory.getbasetemp()
+    base_path = tmp_path_factory.mktemp("test_file_path")
     test_file = base_path / TEST_FILE["file"]
     prov_file = base_path / TEST_FILE["prov"]
     test_file.touch()
@@ -39,7 +39,7 @@ def test_file_path(tmp_path_factory):
 
 @pytest.fixture
 def test_file_with_prov(tmp_path_factory):
-    base_path = tmp_path_factory.getbasetemp()
+    base_path = tmp_path_factory.mktemp("test_file_with_prov")
     test_file = base_path / TEST_FILE["file"]
     prov_file = base_path / TEST_FILE["prov"]
     test_file.touch()
@@ -108,3 +108,20 @@ def test_cli_add_origin(test_file_with_prov):
     assert p.tree()["primary_sources"][0][
         "uri"
     ] == "http://vocab.ub.uni-leipzig.de/provit" + str(test_file)
+
+
+def test_cli_add_sources(test_file_with_prov):
+    base_path, test_file, prov_file = test_file_with_prov
+    new_file = base_path / "new.txt"
+    new_file.touch()
+    runner = CliRunner()
+    options = (
+        ["add"]
+        + ADD_OPTIONS_LIST[0][0]
+        + ADD_OPTIONS_LIST[1][0]
+        + ADD_OPTIONS_LIST[2][0]
+    )
+    result = runner.invoke(cli, options + ["--sources", str(test_file), str(new_file)])
+    assert result.exit_code == 0
+    print(Provenance(new_file).tree()["sources"][0], Provenance(test_file).tree())
+    assert Provenance(new_file).tree()["sources"][0] == Provenance(test_file).tree()

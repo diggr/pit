@@ -274,8 +274,6 @@ class Provenance(object):
                 raise IOError("Source file does not exist")
 
             if os.path.abspath(filepath) == self.filepath:
-                #raise IOError("Can't add same file as source file")
-                print("Can't add same file as source file")
                 continue
 
             source_prov = Provenance(filepath)
