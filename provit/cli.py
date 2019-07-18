@@ -12,11 +12,26 @@ import json
 import os
 import sys
 
-from prompt_toolkit.shortcuts import input_dialog, yes_no_dialog
+from prompt_toolkit import prompt
+from prompt_toolkit.validation import Validator, ValidationError
 from .agent import load_agent_profiles
 from .prov import Provenance, load_prov
 from .browser import start_provit_browser
 from .home import add_directory
+
+YES = ["y", "ye", "yes"]
+NO = ["n", "no"]
+
+
+class YesNoValidator(Validator):
+    def validate(self, document):
+        text = document.text.strip().lower()
+        if text and text not in YES + NO:
+            raise ValidationError(message="Please enter 'y(es)' or 'n(o)'")
+
+
+def mapyesno(result):
+    return True if result.strip().lower() in YES else False
 
 
 @click.group()
@@ -80,6 +95,7 @@ def add(filepath, agent, activity, comment, sources, origin):
 
         prov.save()
 
+
 @cli.command()
 @click.argument("filepath")
 def show(filepath):
@@ -100,72 +116,108 @@ def show(filepath):
         print(json.dumps(prov.tree(), indent=4))
     else:
         print(f"No provenance information found for {filepath}")
-        print(f"You can create provenance for this file by typing: provit create {filepath}")
+        print(
+            f"You can create provenance for this file by typing: provit create {filepath}"
+        )
         sys.exit(1)
 
 
 @cli.command()
 @click.argument("filepath")
 def create(filepath):
-    
-    # Activity
-    prov = load_prov(filepath) 
-    if prov:
-        prompt_text = "Create a new provenance file."
-    else:
-        prompt_text = "Append a new provenance node to an existing file."
-    activity = input_dialog(
-        title="Activity (prov:wasGeneratedBy)",
-        text=f"{prompt_text}\n\nEnter the perfomed activity:"
-    )
-    description = input_dialog(
-        title="Comment / Description (rdfs:label for prov:Activity)",
-        text=f"Describe the perfomed activity briefly:"
-    )
-   
-    # Agent
-    known_agents = load_agent_profiles() 
-    known_agent_list = "\n".join([ a.slug for a in known_agents])
-    result = yes_no_dialog(
-        title="Select an agent (prov:Agent)",
-        text=f"Known agents:\n{known_agent_list}\n\nDo you want to use a known agent?"
-    ) 
 
+    # Activity
+    prov = load_prov(filepath)
+    if prov:
+        print("Append a new provenance node to an existing file.")
+    else:
+        print("Create a new provenance file.")
+    print("Activity (prov:wasGeneratedBy)")
+    activity = prompt("Name the perfomed activity: ")
+
+    print("Comment / Description (rdfs:label for prov:Activity)")
+    description = prompt(f"Describe the perfomed activity briefly: ")
+
+    # Agent
+    known_agents = load_agent_profiles()
+    known_agents_list = "\n".join([a.slug for a in known_agents])
+    agents = []
+    while True:
+        while True:
+            agent = None
+    
+            print("Select an agent (prov:Agent)")
+            agent_yesno_result = prompt(
+                f"Known agents:\n{known_agents_list}\n\nDo you want to use a known agent? ",
+                validator=YesNoValidator(),
+            )
+            agent_result = mapyesno(agent_yesno_result)
+    
+            if agent_result:
+                enumerated_agents_list = "\n".join(
+                    [f"({i}) {agent.slug}" for i, agent in enumerate(known_agents)]
+                )
+                print("Select an agent (prov:Agent)")
+                agent_id = prompt(
+                    f"Known agents:\n{enumerated_agents_list}\n\nEnter the number of the agent you want to use: "
+                )
+    
+                try:
+                    agent_id_int = int(agent_id)
+                except (ValueError, TypeError):
+                    continue
+    
+                try:
+                    agent = known_agents[agent_id_int]
+                    break
+                except IndexError:
+                    continue
+            else:
+                print("Enter an agent (prov:Agent)")
+                new_agent_name = prompt("Enter the name of your (new) agent: ")
+                break
+        
+        if agent is not None:
+            agent_name = agent.slug
+        else:
+            agent_name = new_agent_name
+        agents.append(agent_name)
+
+        another_agent = prompt("Add another agent?", validator=YesNoValidator())
+        another_agent_result = mapyesno(another_agent)
+        if not another_agent_result:
+            break
+   
     # Sources
     sources = []
-    sources_prompt_title = "Source Files (prov:wasDerivedFrom)"
+    print("Source Files (prov:wasDerivedFrom)")
     while True:
-        result = yes_no_dialog(
-            title=sources_prompt_title,
-            text="Do you want to add a(nother) source?"
-        ) 
-        if not result:
-            break
-        source = input_dialog(
-            title=sources_prompt_title,
-            text="Enter the filenames of the source files:"
+        source_yesno_result = prompt(
+            "Do you want to add a(nother) source?", validator=YesNoValidator()
         )
+        if not mapyesno(source_yesno_result):
+            break
+        source = prompt("Enter the filenames of the source files:")
         sources.append(source)
 
     # Origin
-    origin_prompt_title = "Origin (prov:hadPrimarySource)"
-    result = yes_no_dialog(
-        title=origin_prompt_title,
-        text="Do you want to add an origin (primary source)?"
+    print("Origin (prov:hadPrimarySource)")
+    origin_yesno_result = prompt(
+        "Do you want to add an origin (primary source)?", validator=YesNoValidator()
     )
-    if result:
-        origin = input_dialog(
-            title=sources_prompt_title,
-            text="Describe the perfomed activity briefly:"
-        )
+    if mapyesno(origin_yesno_result):
+        origin = prompt("Describe the perfomed activity briefly: ")
     else:
         origin = None
 
-    print(activity)
-    print(agent)
-    print(description)
-    print(sources)
-    print(origin)
+    prov.add(agents=agents, activity=activity, description=description)
+    prov.save()
 
-    
-    
+    if sources:
+        for source in sources:
+            prov.add_sources(source)
+        prov.save()
+
+    if origin:
+        prov.add_primary_source(origin)
+        prov.save()

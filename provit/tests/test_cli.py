@@ -147,4 +147,3 @@ def test_cli_show(test_file_with_prov):
     result = runner.invoke(cli, ["show", str(new_file)])
     result.exit_code == 1
 
-  
