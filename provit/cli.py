@@ -134,6 +134,7 @@ def create(filepath):
         print("Append a new provenance node to an existing file.")
     else:
         print("Create a new provenance file.")
+        prov = Provenance(filepath)
     print("Activity (prov:wasGeneratedBy)")
     activity = prompt("Name the perfomed activity: ")
 
