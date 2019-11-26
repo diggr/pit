@@ -111,6 +111,8 @@ def show(filepath):
 
     $ provit show test.txt | jq
     """
+    if filepath.endswith(".prov"):
+        filepath = filepath[:-5]
     prov = load_prov(filepath)
     if prov:
         print(json.dumps(prov.tree(), indent=4))
