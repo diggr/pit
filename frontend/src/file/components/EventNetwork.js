@@ -43,18 +43,22 @@ const generateLabel = (event) => {
 const options = {
     layout: {
         improvedLayout: true,
-        hierarchical: {
-            sortMethod: "directed",
-            levelSeparation: 120,
 
-        }
     },
+    physics: {
+        enabled: true,
+        barnesHut: {
+            springLength: 250,
+            springConstant: 0.02
+        },
+        solver: 'barnesHut'
+    },    
     edges: {
-      smooth: true,
-      arrows: {to : true },
-      color: {
-          color: darkCyan
-      }
+        smooth: true,
+        arrows: {to : true },
+        color: {
+            color: darkCyan
+        }
     },
     nodes: {    
         shape: 'box',
@@ -68,23 +72,23 @@ const options = {
             font: {
                 color: 'white',
             },
-          color: {
+            color: {
             background: sourceBlueGrey,
             border: darkCyan,
             highlight: {
                 background: highlight,
                 border: '#EF5350'
             }
-          }
+            }
         },
         file: {
             font: {
                 color: 'white',
             },
             color: {
-              background: darkCyan,
-              border: lightCyan,
-              highlight: {
+                background: darkCyan,
+                border: lightCyan,
+                highlight: {
                 background: highlight,
                 border: '#EF5350'
                 }
@@ -97,7 +101,7 @@ const options = {
         }
     }
 }
-   
+
 class EventNetwork extends Component {
 
     flatProvData (data) {
@@ -107,68 +111,67 @@ class EventNetwork extends Component {
         }
     }
 
+    addEdge (source, target) {
+        const edge_id = source + target
+        this.edges.update({
+            id: edge_id,
+            from: source,
+            to: target,
+            arrows: 'from'
+        })  
+    }
+
     iterProvData (root) {
-        console.log(root.location)
-        const currentNodes = this.nodes.getIds()
+        console.log("EDGES")
+        console.log(this.edges)
+
         const source = root.uri
         const filename = this.props.prov.location
         let group = 'source'
         if (root.location === filename)
             group = 'file'
 
-
-
-        currentNodes.push(source)
         this.nodes.update({
             id: source,
             label: generateLabel(root),
             group: group,
-            start: root.ended_at,
             content: generateLabel(root)
         })
     
         if (root.primary_sources) {
             for (const ps of root.primary_sources) {
                 this.nodes.update({
-                    id: ps,
-                    label: "<i>Primary source</i>\n<b>"+getFilename(ps)+"</b>",
+                    id: ps.uri,
+                    label: "Primary source\n<b>"+ps.slug+"</b>",
                     group: 'primarySource'
                 })
-                this.edges.update({
-                    from: source,
-                    to: ps,
-                    arrows: 'from'
-                })                
+
+                this.addEdge(source, ps.uri)              
             }
         }
     
-    
         if (root.sources) {
             for (const source_data of root.sources) {
-                const target = source_data.uri
-        
-                const filename = this.props.prov.location
-                let group = 'source'
-                if (source_data.location === filename)
-                    group = 'file'
+                if (Object.keys(source_data).length !== 0) {
 
-                currentNodes.push(target)
-                this.nodes.update({
-                    id: target,
-                    label: generateLabel(source_data),
-                    group: group,
-                    start: source_data.ended_at,
-                    content: generateLabel(source_data)
-                })
-    
-                this.edges.update({
-                    from: source,
-                    to: target,
-                    arrows: 'from'
-                })
-            }
-            for (const source_data of root.sources) {
-                this.iterProvData(source_data)
+                    const target = source_data.uri
+            
+                    const filename = this.props.prov.location
+                    let group = 'source'
+                    if (source_data.location === filename)
+                        group = 'file'
+
+                    this.nodes.update({
+                        id: target,
+                        label: generateLabel(source_data),
+                        group: group,
+                        content: generateLabel(source_data)
+                    })
+        
+                    this.addEdge(source, target)    
+
+                    this.iterProvData(source_data)
+                }
             }
         }     
     }

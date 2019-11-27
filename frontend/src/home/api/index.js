@@ -27,7 +27,7 @@ export function removeDirectory (directory) {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
-              },            
+            },            
             mode: 'cors',
             body: JSON.stringify({ directory })
             })
@@ -49,7 +49,7 @@ export function addDirectory (directory) {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
-              },            
+             },            
             mode: 'cors',
             body: JSON.stringify({ directory })
             })

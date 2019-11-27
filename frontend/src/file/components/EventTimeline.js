@@ -33,11 +33,7 @@ class EventTimeline extends Component {
 
 
     iterProvData (root) {
-
-        const currentNodes = this.nodes.getIds()
-
-        const source = root.uri
-        
+        const source = root.uri       
         if (root.started_at)
             this.nodes.update({
                 id: source,
@@ -56,17 +52,10 @@ class EventTimeline extends Component {
                 content: generateLabel(root)
             })
 
-        currentNodes.push(source)
-
-    
-        
         if (root.sources) {
             for (const source_data of root.sources) {
-                const target = source_data.uri
-    
-
-    
-                    currentNodes.push(target)
+                if (Object.keys(source_data).length !== 0) {
+                    const target = source_data.uri
                     this.nodes.update({
                         id: target,
                         label: generateLabel(source_data),
@@ -74,11 +63,8 @@ class EventTimeline extends Component {
                         start: source_data.ended_at,
                         content: generateLabel(source_data),
                     })
-
-
-            }
-            for (const source_data of root.sources) {
-                this.iterProvData(source_data)
+                    this.iterProvData(source_data)
+                }
             }
         }     
     }
