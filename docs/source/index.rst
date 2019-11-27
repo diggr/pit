@@ -6,13 +6,13 @@
 Welcome to provit!
 ==================
 
-.. image:: assets/provit_promo.png
-
 This is the documentation for the provenance integration tools (provit).
 It consinsts of a command line interface, a browser frontend and a python
 package which you can include into your project to track your provenance
 from within your software. Feel free to look around and contact us, if 
 you have any questions or find mistakes.
+
+.. image:: assets/provit_demo_001.gif
 
 .. toctree::
    :maxdepth: 2
