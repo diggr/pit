@@ -16,6 +16,7 @@ setup(
     name="provit",
     description='A light, dezentralized provenance tracking framework using the W3C PROV-O vocabulary',
     long_description=readme,
+    long_description_content_type="text/x-rst",
     license="MIT",
     author='Diggr Team',
     author_email='team@diggr.link',

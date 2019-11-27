@@ -34,8 +34,7 @@ Quick Installation
 .. note::
    *provit* requires a working installation of Python 3.7, furthermore the use of a 
    `virtualenv <https://virtualenv.pypa.io/en/stable/>`__ is strongly encouraged.
-   If you need help to set this up, please follow the Installation 
-   (:ref:`provit-installation`) section in the documentation. 
+   If you need help to set this up, please follow the Installation section in the documentation. 
 
 *provit* is availabe via the Python Package Index (PyPI) and can be installed by using
 pip `pip <https://pypi.org/>`__. Simply create a virtualenvironment with your 
@@ -51,7 +50,7 @@ Quickstart
 
 *provit* provides three modes of interaction:
 
-* command line interface  (:ref:`provit-cli`)
+* command line interface 
 * graphical user interface 
 * python package
 
@@ -66,8 +65,6 @@ You can start provit browser directly from your terminal:
 .. code:: zsh
 
     $ provit browser
-
-.. _provit-cli:
 
 provit cli
 ~~~~~~~~~~
