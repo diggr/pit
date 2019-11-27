@@ -200,7 +200,7 @@ def create(filepath):
         )
         if not mapyesno(source_yesno_result):
             break
-        source = prompt("Enter the filenames of the source files:")
+        source = prompt("Enter the filenames of the source files: ")
         sources.append(source)
 
     # Origin
@@ -209,7 +209,7 @@ def create(filepath):
         "Do you want to add an origin (primary source)?", validator=YesNoValidator()
     )
     if mapyesno(origin_yesno_result):
-        origin = prompt("Describe the perfomed activity briefly: ")
+        origin = prompt("Name the primary source (e.g. an URL, an agent, ...): ")
     else:
         origin = None
 
