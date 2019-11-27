@@ -79,23 +79,23 @@ clean: ## Clean the project directory
 	find . -name '*~' -exec rm -f {} +
 
 .PHONY: docs
-docs:
+docs: ## build docs
 	rm -f docs/source/pit.rst
 	rm -f docs/source/modules.rst
 	sphinx-apidoc -o docs/source provit
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 
-.PHONY: dist
-dist: 	clean 
+.PHONY: dist 
+dist: 	clean build-frontend ## Clean repo, build fronend, sdist and bdist
 	python setup.py sdist bdist_wheel
 
 .PHONY: testupload
-testupload: dist
+testupload: dist ## Upload release to PyPI Test
 	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 .PHONY: release
-release: dist
+release: dist ## Upload release to PyPI
 	twine upload dist/*
 
 
