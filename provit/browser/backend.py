@@ -15,85 +15,7 @@ from ..prov import Provenance, load_prov
 from flask_cors import CORS, cross_origin
 from flask import Flask, jsonify, render_template, request
 
-app = Flask(__name__)
-cors = CORS(app)
-app.config["CORS_HEADERS"] = "Content-Type"
-
-# Disable all console logging
-""" app.logger.disabled = True
-log = logging.getLogger('werkzeug')
-log.disabled = True """
-
 PROVIS_PORT = 5555
-
-
-cfg = get_config()
-
-
-# HOME VIEW (DIRECTORY LIST)
-@app.route("/directories", methods=["GET", "POST"])
-def directories():
-    if request.method == "GET":
-        dirs = load_directories()
-    elif request.method == "POST":
-        new_directory = request.json["directory"]
-        dirs = add_directory(new_directory)
-
-    return jsonify({"directories": dirs})
-
-
-@app.route("/directories/remove", methods=["POST"])
-def delete_directories():
-    directory = request.json["directory"]
-    dirs = remove_directories(directory)
-    return jsonify({"directories": dirs})
-
-
-# FILEBROWSER ENDPOINT
-@app.route("/filebrowser", methods=["POST"])
-def file_browser():
-    directory = request.json["directory"]
-    with_files = request.json["withFiles"]
-    with_hidden = request.json["withHidden"]
-
-    if directory == "" or not os.path.exists(directory):
-        directory = str(Path.home())
-        print("dir")
-        print(directory)
-
-    print(with_files)
-    files = []
-    dirs = []
-
-    for filename in os.listdir(directory):
-        filepath = os.path.join(directory, filename)
-        if (
-            not filename.endswith(".prov")
-            and not os.path.isdir(filepath)
-            and with_files
-        ):
-            if not with_hidden and not filename.startswith("."):
-                files.append({"filename": filename, "filepath": filepath})
-        if os.path.isdir(filepath):
-            if not with_hidden and not filename.startswith("."):
-                dirs.append({"dirname": filename, "dirpath": filepath})
-
-    return jsonify(
-        {
-            "files": sorted(files, key=lambda x: x["filename"]),
-            "dirs": sorted(dirs, key=lambda x: x["dirname"]),
-        }
-    )
-
-
-# DIRECTORY VIEW (FILE LIST)
-
-
-def files_with_prov(directory):
-    for filename in os.listdir(directory):
-        filepath = os.path.join(directory, filename)
-        if not filename.endswith(".prov") and not os.path.isdir(filepath):
-            yield {"name": filename, "path": filepath}
 
 
 def _build_file_list(directory):
@@ -105,11 +27,8 @@ def _build_file_list(directory):
             prov = None
             prov_file = "{}.prov".format(filepath)
             if os.path.exists(prov_file):
-                print(prov_file)
                 prov_data = Provenance(filepath)
                 prov_tree = prov_data.tree()
-                print(prov_tree)
-                print(prov_data.get_primary_sources())
                 prov = {
                     "last_activity": prov_tree["activity_desc"],
                     "last_agent": prov_tree["agent"],
@@ -123,160 +42,218 @@ def _build_file_list(directory):
     return files
 
 
-@app.route("/directory", methods=["POST"])
-def file_list():
-    directory = request.json["directory"]
+def create_app(cfg=None):
+    app = Flask(__name__)
+    cors = CORS(app)
+    app.config["CORS_HEADERS"] = "Content-Type"
 
-    files = _build_file_list(directory)
+    # Disable all console logging
+    # app.logger.disabled = True
+    # log = logging.getLogger('werkzeug')
+    # log.disabled = True
 
-    return jsonify({"files": files})
+    if not cfg:
+        cfg = get_config()
 
+    # HOME VIEW (DIRECTORY LIST)
+    @app.route("/directories", methods=["GET", "POST"])
+    def directories():
+        if request.method == "GET":
+            dirs = load_directories(cfg.directories_file)
+        elif request.method == "POST":
+            new_directory = request.json["directory"]
+            dirs = add_directory(new_directory)
 
-@app.route("/directory/update", methods=["POST"])
-def update_file_list():
-    directory = request.json["directory"]
+        return jsonify({"directories": dirs})
 
-    for f in files_with_prov(directory):
-        prov = Provenance(f["path"])
-        if prov.tree()["location"] != f["path"]:
-            prov.add(
-                agents=[],
-                activity="move_file",
-                description="file moved to new location -> {}".format(directory),
-            )
-            prov.save()
+    @app.route("/directories/remove", methods=["POST"])
+    def delete_directories():
+        directory = request.json["directory"]
+        dirs = remove_directories(directory)
+        return jsonify({"directories": dirs})
 
-    files = _build_file_list(directory)
-    return jsonify({"files": files})
+    # FILEBROWSER ENDPOINT
+    @app.route("/filebrowser", methods=["POST"])
+    def file_browser():
+        directory = request.json["directory"]
+        with_files = request.json["withFiles"]
+        with_hidden = request.json["withHidden"]
 
+        if directory == "" or not os.path.exists(directory):
+            directory = str(Path.home())
 
-# AGENTS LIST
-@app.route("/agents")
-def agent_list():
-    agents = load_agent_profiles()
-    agents_structured = {cfg.person: [], cfg.software: [], cfg.organization: []}
-    for agent in agents:
-        agents_structured[agent.type].append(agent.to_json())
+        files = []
+        dirs = []
 
-    print(agents_structured.keys())
-    return jsonify({"agents": agents_structured})
+        for filename in os.listdir(directory):
+            filepath = os.path.join(directory, filename)
+            if (
+                not filename.endswith(".prov")
+                and not os.path.isdir(filepath)
+                and with_files
+            ):
+                if not with_hidden and not filename.startswith("."):
+                    files.append({"filename": filename, "filepath": filepath})
+            if os.path.isdir(filepath):
+                if not with_hidden and not filename.startswith("."):
+                    dirs.append({"dirname": filename, "dirpath": filepath})
 
+        return jsonify(
+            {
+                "files": sorted(files, key=lambda x: x["filename"]),
+                "dirs": sorted(dirs, key=lambda x: x["dirname"]),
+            }
+        )
 
-# FILE VIEW ENDPOINT
-@app.route("/file", methods=["POST"])
-def get_prov_data():
-    filepath = request.json["filepath"]
-    prov = load_prov(filepath)
+    # DIRECTORY VIEW (FILE LIST)
 
-    if not prov:
-        return jsonify({"hasProv": False})
-    return jsonify(
-        {
-            "hasProv": True,
-            "root_event": prov.entity,
-            "prov": prov.tree(),
-            "agents": prov.get_agents(),
-        }
-    )
+    def files_with_prov(directory):
+        for filename in os.listdir(directory):
+            filepath = os.path.join(directory, filename)
+            if not filename.endswith(".prov") and not os.path.isdir(filepath):
+                yield {"name": filename, "path": filepath}
 
+    @app.route("/directory", methods=["POST"])
+    def file_list():
+        directory = request.json["directory"]
 
-@app.route("/file/remove", methods=["POST"])
-def remove_prov_data():
-    filepath = request.json["filepath"]
-    prov = Provenance(filepath)
-    prov.remove_last_event()
-    prov.save()
+        files = _build_file_list(directory)
 
-    if not prov.entity:
-        os.remove("{}.prov".format(filepath))
+        return jsonify({"files": files})
 
-    prov = load_prov(filepath)
+    @app.route("/directory/update", methods=["POST"])
+    def update_file_list():
+        directory = request.json["directory"]
 
-    if not prov:
-        return jsonify({"hasProv": False})
-    return jsonify(
-        {
-            "hasProv": True,
-            "root_event": prov.entity,
-            "prov": prov.tree(),
-            "agents": prov.get_agents(),
-        }
-    )
+        for f in files_with_prov(directory):
+            prov = Provenance(f["path"])
+            if prov.tree():
+                if prov.tree()["location"] != f["path"]:
+                    prov.add(
+                        agents=[],
+                        activity="move_file",
+                        description="file moved to new location -> {}".format(
+                            directory
+                        ),
+                    )
+                    prov.save()
 
+        files = _build_file_list(directory)
+        return jsonify({"files": files})
 
-@app.route("/file/add", methods=["POST"])
-def add_prov_data():
-    filepath = request.json["filepath"]
-    prov_data = request.json["prov"]
-    is_timestamp = request.json["isTimestamp"]
-    print("timestamp: ", is_timestamp)
-    prov = Provenance(filepath)
+    # AGENTS LIST
+    @app.route("/agents")
+    def agent_list():
+        agents = load_agent_profiles()
+        agents_structured = {cfg.person: [], cfg.software: [], cfg.organization: []}
+        for agent in agents:
+            agents_structured[agent.type].append(agent.to_json())
 
-    activity = prov_data["activitySlug"]
-    agents = [x for x in prov_data["agents"] if x]
-    desc = prov_data["comment"]
-    sources = [x for x in prov_data["sources"] if x]
-    primary_sources = [x for x in prov_data["primarySources"] if x]
-    if is_timestamp:
-        started_at = ""
-        ended_at = prov_data["startedAt"]
-    else:
-        started_at = prov_data["startedAt"]
-        ended_at = prov_data["endedAt"]
+        return jsonify({"agents": agents_structured})
 
-    prov.add(
-        agents=agents,
-        description=desc,
-        activity=activity,
-        started_at=started_at,
-        ended_at=ended_at,
-    )
+    # FILE VIEW ENDPOINT
+    @app.route("/file", methods=["POST"])
+    def get_prov_data():
+        filepath = request.json["filepath"]
+        prov = load_prov(filepath)
 
-    prov.add_sources(sources)
+        if not prov:
+            return jsonify({"hasProv": False})
+        return jsonify(
+            {
+                "hasProv": True,
+                "root_event": prov.entity,
+                "prov": prov.tree(),
+                "agents": prov.get_agents(),
+            }
+        )
 
-    for primary_source in primary_sources:
-        prov.add_primary_source(primary_source)
+    @app.route("/file/remove", methods=["POST"])
+    def remove_prov_data():
+        filepath = request.json["filepath"]
+        prov = Provenance(filepath)
+        prov.remove_last_event()
+        prov.save()
 
-    prov.save()
+        if not prov.entity:
+            os.remove("{}.prov".format(filepath))
 
-    if not prov:
-        return jsonify({})
-    return jsonify(
-        {
-            "hasProv": True,
-            "root_event": prov.entity,
-            "prov": prov.tree(),
-            "agents": prov.get_agents(),
-        }
-    )
+        prov = load_prov(filepath)
 
+        if not prov:
+            return jsonify({"hasProv": False})
+        return jsonify(
+            {
+                "hasProv": True,
+                "root_event": prov.entity,
+                "prov": prov.tree(),
+                "agents": prov.get_agents(),
+            }
+        )
 
-# CONFIG
+    @app.route("/file/add", methods=["POST"])
+    def add_prov_data():
+        filepath = request.json["filepath"]
+        prov_data = request.json["prov"]
+        is_timestamp = request.json["isTimestamp"]
+        prov = Provenance(filepath)
 
+        activity = prov_data["activitySlug"]
+        agents = [x for x in prov_data["agents"] if x]
+        desc = prov_data["comment"]
+        sources = [x for x in prov_data["sources"] if x]
+        primary_sources = [x for x in prov_data["primarySources"] if x]
+        if is_timestamp:
+            started_at = ""
+            ended_at = prov_data["startedAt"]
+        else:
+            started_at = prov_data["startedAt"]
+            ended_at = prov_data["endedAt"]
 
-@app.route("/config")
-def config():
-    provit_dir = cfg.provit_dir
-    return jsonify({"config": {"provit_dir": provit_dir}})
+        prov.add(
+            agents=agents,
+            description=desc,
+            activity=activity,
+            started_at=started_at,
+            ended_at=ended_at,
+        )
 
+        prov.add_sources(sources)
 
-@app.route("/config/update")
-def config_update():
-    pass
+        for primary_source in primary_sources:
+            prov.add_primary_source(primary_source)
 
+        prov.save()
 
-# Provit browser routes
-@app.route("/")
-@app.route("/directory/")
-@app.route("/agents/")
-@app.route("/file/")
-@app.route("/config/")
-def index():
-    return render_template("index.html")
+        return jsonify(
+            {
+                "hasProv": True,
+                "root_event": prov.entity,
+                "prov": prov.tree(),
+                "agents": prov.get_agents(),
+            }
+        )
+
+    @app.route("/config")
+    def config():
+        provit_dir = str(cfg.provit_dir)
+        return jsonify({"config": {"provit_dir": provit_dir}})
+
+    # Provit browser routes
+    @app.route("/")
+    @app.route("/directory/")
+    @app.route("/agents/")
+    @app.route("/file/")
+    @app.route("/config/")
+    def index():
+        return render_template("index.html")
+
+    return app
 
 
 #####
 def start_backend(debug=False):
+    app = create_app()
     try:
         app.run(debug=debug, port=PROVIS_PORT, use_reloader=False)
     except OSError as e:

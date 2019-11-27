@@ -16,6 +16,7 @@ setup(
     name="provit",
     description='A light, dezentralized provenance tracking framework using the W3C PROV-O vocabulary',
     long_description=readme,
+    long_description_content_type="text/x-rst",
     license="MIT",
     author='Diggr Team',
     author_email='team@diggr.link',
@@ -24,7 +25,7 @@ setup(
     package_dir={
             'provit': 'provit'
         },
-    version="1.0.2",
+    version="1.1.0",
     py_modules=["provit", "browser"],
     install_requires=requirements,
     include_package_data=True,

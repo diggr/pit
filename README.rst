@@ -4,9 +4,11 @@ provit - Provenance Integration Tools
 |Python 3| |GitHub license| |GitHub issues| |Docs passing|
 
 *provit* is a data provenance annotation and documentation tool. It provides various feature for
-creation and retrieval of provenance information for file like stored data. Tracking sources, 
-modification, and merges allows the user to keep track of data provenance in long running 
-workflows (e.g. for a scientific thesis).
+creation and retrieval of provenance information for data stored in files. The tracking of sources, 
+modifications and merges allows the user to keep a log of all modifications a dataset was subject
+to. This is especially useful for dataset which are accessed intermittently or part of a long 
+running workflow (e.g. for a scientific thesis). Furthermore, provenance data stored next to the 
+data in an archive can help others to identify quality, value and acutality of the data. 
 
 *provit* does not require any external infrastructure. All information is stored in *.prov* 
 files right next to the data files as a JSON-LD graph. This makes it the perfect tool for small 
@@ -26,46 +28,29 @@ Full documentation is available under: `provit.readthedocs.io <https://provit.re
 
 .. image:: assets/provit_promo.png
 
-Installation
-------------
+Quick Installation
+------------------
 
-Installation via `pip <https://pypi.org/>`__ is recommended for end
-users. We strongly encourage end users to make use of a
-`virtualenv <https://virtualenv.pypa.io/en/stable/>`__.
+.. note::
+   *provit* requires a working installation of Python 3.7, furthermore the use of a 
+   `virtualenv <https://virtualenv.pypa.io/en/stable/>`__ is strongly encouraged.
+   If you need help to set this up, please follow the Installation section in the documentation. 
 
-pip
-~~~
-
-Clone the repository and create a virtual environment (optional) and 
-install into with pip into the virtualenv.
+*provit* is availabe via the Python Package Index (PyPI) and can be installed by using
+pip `pip <https://pypi.org/>`__. Simply create a virtualenvironment with your 
+preferred method a run the *pip install* command:
 
 .. code:: zsh
 
     $ mkvirtualenv provit
     $ pip install provit
 
-git / Development
-~~~~~~~~~~~~~~~~~
-
-Clone the repository and create a virtualenv.
-
-.. code:: zsh
-
-    $ git clone https://github.com/diggr/provit
-    $ mkvirtualenv provit
-
-Install it with pip (*editable*).
-
-.. code:: zsh
-
-    $ pip install -e provit
-
 Quickstart
 ----------
 
 *provit* provides three modes of interaction:
 
-* command line interface
+* command line interface 
 * graphical user interface 
 * python package
 
@@ -80,7 +65,6 @@ You can start provit browser directly from your terminal:
 .. code:: zsh
 
     $ provit browser
-
 
 provit cli
 ~~~~~~~~~~
@@ -139,7 +123,7 @@ Overview
 :License: MIT
 :Copyright: 2018-2019, Peter Mühleder and `Universitätsbibliothek Leipzig <https://ub.uni-leipzig.de>`__
 
-.. |Python 3| image:: https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7-blue.svg
+.. |Python 3| image:: https://img.shields.io/badge/python-3.7-blue.svg
 .. |GitHub license| image:: https://img.shields.io/github/license/diggr/pit.svg
    :target: https://github.com/diggr/pit/blob/master/LICENSE
 .. |GitHub issues| image:: https://img.shields.io/github/issues/diggr/pit.svg

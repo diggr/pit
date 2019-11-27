@@ -81,7 +81,18 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'default'
+# html_theme = 'default'
+html_theme = 'alabaster'
+
+html_theme_options = {
+    "font_family": '"Avenir Next", Calibri, "PT Sans", sans-serif',
+    "head_font_family": '"Avenir Next", Calibri, "PT Sans", sans-serif',
+    "font_size": "14px",
+    "page_width": "980px",
+    "sidebar_width": "225px",
+    "logo": "assets/provit.png",
+    "show_relbars": True
+}
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

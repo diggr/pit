@@ -23,21 +23,6 @@ PA = {
 OA = {}
 
 
-@pytest.fixture
-def prov_path_with_agents(tmp_path_factory):
-    prov_path = tmp_path_factory.mktemp("with_agents")
-    cfg = get_config(prov_path)
-    for agent_file in [
-        "wikidata.yaml",
-        "johndoe.yaml",
-        "gephi_0.9.2.yaml",
-        "invalid.yaml",
-    ]:
-        origin_path = Path(__file__).resolve().parent / "fixtures"
-        shutil.copy(str(origin_path / agent_file), str(cfg.agents_dir))
-    return prov_path
-
-
 def test_load_agent_profiles_on_empty(tmp_path):
     agent.cfg = get_config(tmp_path)
     agents = agent.load_agent_profiles()
